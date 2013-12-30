@@ -1,6 +1,6 @@
 package gorbac
 
-const(
+const (
 	bufferSize = 16
 )
 
@@ -17,16 +17,16 @@ func New(createMissing bool) *Rbac {
 	return rbac
 }
 
-func (rbac *Rbac) addRole(role string, parent ... string) bool {
+func (rbac *Rbac) AddRole(role string, parent ...string) bool {
 	return false
 }
-func (rbac *Rbac) getRole(role string) Role {
+func (rbac *Rbac) GetRole(role string) Role {
 	return nil
 }
-func (rbac *Rbac) hasRole(role string) bool {
+func (rbac *Rbac) HasRole(role string) bool {
 	return false
 }
-func (rbac *Rbac) isGranted(role, permission string,
+func (rbac *Rbac) IsGranted(role, permission string,
 	assert AssertionFunc) bool {
 	return false
 }
