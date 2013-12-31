@@ -5,11 +5,10 @@ type Role interface {
 	AddPermission(string)
 	HasPermission(string) bool
 	AddChild(Role)
-	SetParent(Role)
-	GetParent() Role
+	GetChildren() []Role
 }
 
-func NewRole(name string) Role {
+func NewBaseRole(name string) Role {
 	role := &BaseRole{
 		name:        name,
 		permissions: make(map[string]bool, bufferSize),
@@ -22,7 +21,6 @@ type BaseRole struct {
 	name        string
 	permissions map[string]bool
 	children    []Role
-	parent      Role
 }
 
 func (role *BaseRole) GetName() string {
@@ -34,8 +32,8 @@ func (role *BaseRole) AddPermission(permission string) {
 }
 
 func (role *BaseRole) HasPermission(permission string) bool {
-	if _, ok := role.permissions[permission]; ok {
-		return ok
+	if permit := role.permissions[permission]; permit {
+		return permit
 	}
 	for _, child := range role.children {
 		if child.HasPermission(permission) {
@@ -47,14 +45,9 @@ func (role *BaseRole) HasPermission(permission string) bool {
 }
 
 func (role *BaseRole) AddChild(child Role) {
-	child.SetParent(role)
 	role.children = append(role.children, child)
 }
 
-func (role *BaseRole) SetParent(parent Role) {
-	role.parent = parent
-}
-
-func (role *BaseRole) GetParent() Role {
-	return role.parent
+func (role *BaseRole) GetChildren() []Role {
+	return role.children
 }

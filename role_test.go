@@ -5,49 +5,69 @@ import (
 )
 
 const (
-	A         = "a"
-	B         = "b"
-	C         = "c"
-	OK        = "ok"
+	// Roles
+	RA = "a"
+	RB = "b"
+	RC = "c"
+	// Permissions
+	PA = "a"
+	PB = "b"
+	PC = "c"
+
 	NOTEXISTS = "not-exists"
-	INHERIT   = "inherit"
 )
 
 func TestRole(t *testing.T) {
-	a := NewRole(A)
-	if a.GetName() != A {
-		t.Errorf("`%s` expected, `%s` got.", A, a.GetName())
+	ra := NewBaseRole(RA)
+	// GetName
+	if ra.GetName() != RA {
+		t.Errorf("`%s` expected, `%s` got.", RA, ra.GetName())
 	}
-	if a.HasPermission(NOTEXISTS) {
-		t.Errorf("`%s` should not have permission `%s`.", a.GetName(), NOTEXISTS)
+	// No permission
+	if ra.HasPermission(NOTEXISTS) {
+		t.Errorf("`%s` should not have permission `%s`.", ra.GetName(), NOTEXISTS)
 	}
-	a.AddPermission(OK)
-	if !a.HasPermission(OK) {
-		t.Errorf("`%s` should have permission `%s`.", a.GetName(), OK)
+	// Has permission
+	ra.AddPermission(PA)
+	if !ra.HasPermission(PA) {
+		t.Errorf("`%s` should have permission `%s`.", ra.GetName(), PA)
 	}
-	b := NewRole(B)
-	a.AddChild(b)
-	if b.GetParent() != a {
-		t.Errorf("`%s`'s parent should be `%s`.", b.GetName(), OK)
+	// Roles compositions
+	rb := NewBaseRole(RB)
+	rc := NewBaseRole(RC)
+	ra.AddChild(rb)
+	rb.AddChild(rc)
+	rb.AddPermission(PB)
+	rc.AddPermission(PC)
+	if !ra.HasPermission(PB) {
+		t.Errorf("`%s` should have permission `%s`.", ra.GetName(), PB)
 	}
-	c := NewRole(C)
-	c.AddPermission(INHERIT)
-	b.AddChild(c)
-	if !a.HasPermission(INHERIT) {
-		t.Errorf("`%s` should have permission `%s`.", a.GetName(), INHERIT)
+	if !ra.HasPermission(PC) {
+		t.Errorf("`%s` should have permission `%s`.", ra.GetName(), PC)
 	}
 }
 
 func BenchmarkHasPermission(b *testing.B) {
-	ra := NewRole(A)
-	rb := NewRole(B)
+	// Initialization
+	ra := NewBaseRole(RA)
+	rb := NewBaseRole(RB)
+	rc := NewBaseRole(RC)
+	// Composition
 	ra.AddChild(rb)
-	rc := NewRole(C)
-	rc.AddPermission(INHERIT)
 	rb.AddChild(rc)
+	// Permission
+	ra.AddPermission(PA)
+	rb.AddPermission(PB)
+	rc.AddPermission(PC)
 	for i := 0; i < b.N; i++ {
-		if !ra.HasPermission(INHERIT) {
-			b.Errorf("`%s` should have permission `%s`.", ra.GetName(), INHERIT)
+		if !ra.HasPermission(PA) {
+			b.Errorf("`%s` should have permission `%s`.", ra.GetName(), PA)
+		}
+		if !ra.HasPermission(PB) {
+			b.Errorf("`%s` should have permission `%s`.", ra.GetName(), PB)
+		}
+		if !ra.HasPermission(PC) {
+			b.Errorf("`%s` should have permission `%s`.", ra.GetName(), PC)
 		}
 	}
 }
