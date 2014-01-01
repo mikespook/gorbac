@@ -28,8 +28,6 @@ func New() *Rbac {
 	return rbac
 }
 
-
-
 func (rbac *Rbac) AddRole(name string, parents ...string) (role Role) {
 	role = rbac.GetRole(name)
 	if role != nil {
@@ -53,5 +51,12 @@ func (rbac *Rbac) IsGranted(name, permission string,
 	if assert != nil && !assert(name, permission, rbac) {
 		return false
 	}
-	return rbac.GetRole(name).HasPermission(permission)
+	if role := rbac.GetRole(name); role != nil {
+		return role.HasPermission(permission)
+	}
+	return false
+}
+
+func (rbac *Rbac) Reset() {
+	rbac.roles = make(map[string]Role, bufferSize)
 }

@@ -46,3 +46,19 @@ func TestRbac(t *testing.T) {
 		t.Error("assert return `false`, `true` got.")
 	}
 }
+
+func TestRbacReset(t *testing.T) {
+	rbac := New()
+	rc := rbac.AddRole(RC, RA, RB)
+	rc.AddPermission(PC)
+
+	if !rbac.IsGranted(RA, PC, nil) {
+		t.Errorf("`%s` granted `%s`, `false` got.", RA, PC)
+	}
+
+	rbac.Reset()
+
+	if rbac.IsGranted(RA, PC, nil) {
+		t.Errorf("`rbac` reset.", RA, PC)
+	}
+}

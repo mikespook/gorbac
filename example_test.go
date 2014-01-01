@@ -32,6 +32,16 @@ func ExampleRbac() {
 	if rbac.IsGranted("c", "a", nil) {
 		fmt.Println("c granted a")
 	}
+	rbac.Reset()
+	if rbac.IsGranted("a", "a", nil) {
+		fmt.Println("a granted a")
+	}
+	if rbac.IsGranted("b", "a", nil) {
+		fmt.Println("b granted a")
+	}
+	if rbac.IsGranted("c", "a", nil) {
+		fmt.Println("c granted a")
+	}
 	// Output: c granted c
 	// a granted c
 	// b granted c
