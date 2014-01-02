@@ -11,7 +11,7 @@ func ExampleRbac() {
 
 	rc := rbac.AddRole("c", "a", "b")
 	rc.AddPermission("c")
-	ra := rbac.GetRole("a")
+	ra := rbac.AddRole("a")
 	ra.AddPermission("a")
 
 	if rbac.IsGranted("c", "c", nil) {

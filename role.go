@@ -5,7 +5,6 @@ type Role interface {
 	AddPermission(string)
 	HasPermission(string) bool
 	AddChild(Role)
-	GetChildren() []Role
 }
 
 func NewBaseRole(name string) Role {
@@ -37,7 +36,6 @@ func (role *BaseRole) HasPermission(permission string) bool {
 	}
 	for _, child := range role.children {
 		if child.HasPermission(permission) {
-			role.AddPermission(permission)
 			return true
 		}
 	}
@@ -46,8 +44,4 @@ func (role *BaseRole) HasPermission(permission string) bool {
 
 func (role *BaseRole) AddChild(child Role) {
 	role.children = append(role.children, child)
-}
-
-func (role *BaseRole) GetChildren() []Role {
-	return role.children
 }

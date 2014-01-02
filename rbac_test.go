@@ -35,14 +35,14 @@ func TestRbac(t *testing.T) {
 	}
 
 	if !rbac.IsGranted(RB, PC, func(name, permission string, rbac *Rbac) bool {
-			return name == RB && permission == PC
-		}) {
+		return name == RB && permission == PC
+	}) {
 		t.Error("assert return `true`, `false` got.")
 	}
 
 	if rbac.IsGranted(RB, PC, func(name, permission string, rbac *Rbac) bool {
-			return name != RB || permission != PC
-		}) {
+		return name != RB || permission != PC
+	}) {
 		t.Error("assert return `false`, `true` got.")
 	}
 }

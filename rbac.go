@@ -5,16 +5,16 @@ const (
 )
 
 type AssertionFunc func(string, string, *Rbac) bool
-type FactoryFunc func(string) Role
+type RoleFactoryFunc func(string) Role
 
 type Rbac struct {
-	roles map[string]Role
-	factory FactoryFunc
+	roles   map[string]Role
+	factory RoleFactoryFunc
 }
 
-func NewWithFactory(factory FactoryFunc) *Rbac {
+func NewWithFactory(factory RoleFactoryFunc) *Rbac {
 	rbac := &Rbac{
-		roles: make(map[string]Role, bufferSize),
+		roles:   make(map[string]Role, bufferSize),
 		factory: factory,
 	}
 	return rbac
@@ -22,7 +22,7 @@ func NewWithFactory(factory FactoryFunc) *Rbac {
 
 func New() *Rbac {
 	rbac := &Rbac{
-		roles: make(map[string]Role, bufferSize),
+		roles:   make(map[string]Role, bufferSize),
 		factory: NewBaseRole,
 	}
 	return rbac
@@ -30,10 +30,9 @@ func New() *Rbac {
 
 func (rbac *Rbac) AddRole(name string, parents ...string) (role Role) {
 	role = rbac.GetRole(name)
-	if role != nil {
-		return
+	if role == nil {
+		role = rbac.factory(name)
 	}
-	role = rbac.factory(name)
 	for _, pn := range parents {
 		pr := rbac.AddRole(pn)
 		pr.AddChild(role)
