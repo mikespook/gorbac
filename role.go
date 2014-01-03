@@ -4,44 +4,66 @@ type Role interface {
 	GetName() string
 	AddPermission(string)
 	HasPermission(string) bool
-	AddChild(Role)
+	RevokePermission(string)
+	AddParent(string)
+	RemoveParent(string)
+	Reset()
 }
 
-func NewBaseRole(name string) Role {
-	role := &BaseRole{
+func newBaseRole(rbac *Rbac, name string) Role {
+	role := &baseRole{
+		rbac: rbac,
 		name:        name,
 		permissions: make(map[string]bool, bufferSize),
-		children:    make([]Role, 0, bufferSize),
+		parents:    make(map[string]bool, bufferSize),
 	}
 	return role
 }
 
-type BaseRole struct {
+type baseRole struct {
+	rbac	*Rbac
 	name        string
 	permissions map[string]bool
-	children    []Role
+	parents    map[string]bool
 }
 
-func (role *BaseRole) GetName() string {
+func (role *baseRole) GetName() string {
 	return role.name
 }
 
-func (role *BaseRole) AddPermission(permission string) {
+func (role *baseRole) AddPermission(permission string) {
 	role.permissions[permission] = true
 }
 
-func (role *BaseRole) HasPermission(permission string) bool {
-	if permit := role.permissions[permission]; permit {
+func (role *baseRole) HasPermission(permission string) bool {
+	if permit, ok := role.permissions[permission]; ok {
 		return permit
 	}
-	for _, child := range role.children {
-		if child.HasPermission(permission) {
-			return true
+	for pname, _ := range role.parents {
+		if parent := role.rbac.GetRole(pname); parent != nil {
+			if parent.HasPermission(permission) {
+				return true
+			}
+		} else {
+			delete(role.parents, pname)
 		}
 	}
 	return false
 }
 
-func (role *BaseRole) AddChild(child Role) {
-	role.children = append(role.children, child)
+func (role *baseRole) RevokePermission(permission string) {
+	delete(role.permissions, permission)
+}
+
+func (role *baseRole) AddParent(name string) {
+	role.parents[name] = true
+}
+
+func (role *baseRole) RemoveParent(name string) {
+	delete(role.parents, name)
+}
+
+func (role *baseRole) Reset() {
+	role.permissions = make(map[string]bool, bufferSize)
+	role.parents = make(map[string]bool, bufferSize)
 }
