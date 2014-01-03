@@ -101,11 +101,11 @@ func TestRbacRemove(t *testing.T) {
 	if rbac.IsGranted(RE, PD, nil) {
 		t.Errorf("`%s` should not be granted `%s`.", RE, PD)
 	}
-	rbac.GetRole(RA).RevokePermission(PA)
+	rbac.Get(RA).RevokePermission(PA)
 	if rbac.IsGranted(RA, PA, nil) {
 		t.Errorf("`%s` should not be granted `%s`.", RA, PA)
 	}
-	rbac.GetRole(RC).RemoveParent(RB)
+	rbac.Get(RC).RemoveParent(RB)
 	if rbac.IsGranted(RC, PB, nil) {
 		t.Errorf("`%s` should not be granted `%s`.", RC, PB)
 	}

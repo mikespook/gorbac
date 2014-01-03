@@ -1,5 +1,10 @@
 package gorbac
 
+// Sometimes, a custom role structure is needed by projects.
+// You should define your own role factory function for this purpuse.
+type RoleFactoryFunc func(*Rbac, string) Role
+
+// Implement this interface for your own role structure.
 type Role interface {
 	GetName() string
 	AddPermission(string)
@@ -40,7 +45,7 @@ func (role *baseRole) HasPermission(permission string) bool {
 		return permit
 	}
 	for pname, _ := range role.parents {
-		if parent := role.rbac.GetRole(pname); parent != nil {
+		if parent := role.rbac.Get(pname); parent != nil {
 			if parent.HasPermission(permission) {
 				return true
 			}
