@@ -22,10 +22,16 @@ import (
 
 const (
 	bufferSize = 16
+
+	ParentKey = "parents"
+	PermissionKey = "permissions"
 )
 
 // Assertion function supplies more fine-grained permission controls.
 type AssertionFunc func(string, string, *Rbac) bool
+
+// Export RBAC to a structure data
+type RbacMap map[string]map[string][]string
 
 // RBAC
 type Rbac struct {
@@ -50,6 +56,18 @@ func New() *Rbac {
 	return NewWithFactory(newBaseRole)
 }
 
+func RestoreWithFactory(data RbacMap, factory RoleFactoryFunc) *Rbac {
+	rbac := NewWithFactory(factory)
+	for role, value := range data {
+		rbac.Add(role, value[PermissionKey], value[ParentKey])
+	}
+	return rbac
+}
+
+func Restore(data RbacMap) *Rbac {
+	return RestoreWithFactory(data, newBaseRole)
+}
+
 // Set a role with `name`. It has `permissions` and `parents`.
 // If the role is not existing, a new one will be created.
 // This function will cover role's orignal permissions and parents.
@@ -64,7 +82,6 @@ func (rbac *Rbac) Set(name string, permissions []string, parents []string) {
 	for _, pname := range parents {
 		role.AddParent(pname)
 	}
-	rbac.roles[name] = role
 }
 
 // Add a role with `name`. It has `permissions` and `parents`.
@@ -81,7 +98,6 @@ func (rbac *Rbac) Add(name string, permissions []string, parents []string) {
 	for _, pname := range parents {
 		role.AddParent(pname)
 	}
-	rbac.roles[name] = role
 }
 
 // Remove a role.
@@ -96,6 +112,7 @@ func  (rbac *Rbac) getRole(name string) Role {
 	role, ok := rbac.roles[name]
 	if !ok {
 		role = rbac.factory(rbac, name)
+		rbac.roles[name] = role
 	}
 	return role
 }
@@ -123,4 +140,16 @@ func (rbac *Rbac) IsGranted(name, permission string,
 		return role.HasPermission(permission)
 	}
 	return false
+}
+
+// Dump RBAC
+func (rbac *Rbac) Dump() RbacMap {
+	m := make(RbacMap)
+	for _, role := range rbac.roles {
+		roleMap := make(map[string][]string)
+		roleMap[PermissionKey] = role.GetPermissions()
+		roleMap[ParentKey] = role.GetParents()
+		m[role.GetName()] = roleMap
+	}
+	return m
 }

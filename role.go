@@ -10,8 +10,10 @@ type Role interface {
 	AddPermission(string)
 	HasPermission(string) bool
 	RevokePermission(string)
+	GetPermissions() []string
 	AddParent(string)
 	RemoveParent(string)
+	GetParents() []string
 	Reset()
 }
 
@@ -71,4 +73,20 @@ func (role *baseRole) RemoveParent(name string) {
 func (role *baseRole) Reset() {
 	role.permissions = make(map[string]bool, bufferSize)
 	role.parents = make(map[string]bool, bufferSize)
+}
+
+func (role *baseRole) GetPermissions() []string {
+	result := make([]string, 0, len(role.permissions))
+	for name, _ := range role.permissions {
+		result = append(result, name)
+	}
+	return result
+}
+
+func (role *baseRole) GetParents() []string {
+	result := make([]string, 0, len(role.parents))
+	for name, _ := range role.parents {
+		result = append(result, name)
+	}
+	return result
 }

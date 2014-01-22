@@ -69,6 +69,11 @@ Thus:
 The role-c has been granted permis-a/b/c.
 The role-e has been granted permis-a/b/c/d.
 */
+func TestDumpRestore(t *testing.T) {
+	m := rbac.Dump()
+	rbac = Restore(m)
+}
+
 func TestRbacRoleC(t *testing.T) {
 	if !rbac.IsGranted(RC, PA, nil) {
 		t.Errorf("`%s` should be granted `%s`.", RC, PA)
@@ -151,5 +156,16 @@ func BenchmarkRbacAdd(b *testing.B) {
 		for role, testingcase := range testingcases {
 			rbac.Add(role, testingcase["permissions"], testingcase["parents"])
 		}
+	}
+}
+
+func BenchmarkDumpRestore(b *testing.B) {
+	rbac := New()
+	for role, testingcase := range testingcases {
+		rbac.Add(role, testingcase["permissions"], testingcase["parents"])
+	}
+	for i := 0; i < b.N; i ++ {
+		m := rbac.Dump()
+		rbac = Restore(m)
 	}
 }
