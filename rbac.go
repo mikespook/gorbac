@@ -29,7 +29,7 @@ type AssertionFunc func(string, string, *Rbac) bool
 
 // RBAC
 type Rbac struct {
-	sync.RWMutex
+	mutex sync.RWMutex
 	roles   map[string]Role
 	factory RoleFactoryFunc
 }
@@ -54,8 +54,8 @@ func New() *Rbac {
 // If the role is not existing, a new one will be created.
 // This function will cover role's orignal permissions and parents.
 func (rbac *Rbac) Set(name string, permissions []string, parents []string) {
-	rbac.Lock()
-	defer rbac.Unlock()
+	rbac.mutex.Lock()
+	defer rbac.mutex.Unlock()
 	role := rbac.getRole(name)
 	role.Reset()
 	for _, p := range permissions {
@@ -72,8 +72,8 @@ func (rbac *Rbac) Set(name string, permissions []string, parents []string) {
 // This function will add new permissions and parents to the role,
 // and keep orignals.
 func (rbac *Rbac) Add(name string, permissions []string, parents []string) {
-	rbac.Lock()
-	defer rbac.Unlock()
+	rbac.mutex.Lock()
+	defer rbac.mutex.Unlock()
 	role := rbac.getRole(name)
 	for _, p := range permissions {
 		role.AddPermission(p)
@@ -86,8 +86,8 @@ func (rbac *Rbac) Add(name string, permissions []string, parents []string) {
 
 // Remove a role.
 func (rbac *Rbac) Remove(name string) {
-	rbac.Lock()
-	defer rbac.Unlock()
+	rbac.mutex.Lock()
+	defer rbac.mutex.Unlock()
 	delete(rbac.roles, name)
 }
 
@@ -102,6 +102,8 @@ func  (rbac *Rbac) getRole(name string) Role {
 
 // Return a role or nil if not exists.
 func  (rbac *Rbac) Get(name string) Role {
+	rbac.mutex.RLock()
+	defer rbac.mutex.RUnlock()
 	role, ok := rbac.roles[name]
 	if !ok {
 		return nil
@@ -112,8 +114,8 @@ func  (rbac *Rbac) Get(name string) Role {
 // Test if the `name` has `permission` in the `assert` condition.
 func (rbac *Rbac) IsGranted(name, permission string,
 	assert AssertionFunc) bool {
-	rbac.RLock()
-	defer rbac.RUnlock()
+	rbac.mutex.RLock()
+	defer rbac.mutex.RUnlock()
 	if assert != nil && !assert(name, permission, rbac) {
 		return false
 	}
