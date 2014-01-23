@@ -71,7 +71,17 @@ The role-e has been granted permis-a/b/c/d.
 */
 func TestDumpRestore(t *testing.T) {
 	m := rbac.Dump()
+	a := len(m)
+	b := len(rbac.roles)
+	if a != b {
+		t.Errorf("`%d` roles, dumped `%d`", b, a)
+	}
+	t.Log(m)
 	rbac = Restore(m)
+	c := len(rbac.roles)
+	if a != c {
+		t.Errorf("`%d` roles, restored `%d`", a, c)
+	}
 }
 
 func TestRbacRoleC(t *testing.T) {
