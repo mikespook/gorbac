@@ -83,6 +83,16 @@ In a real case, it is good for checking if a role existed:
 		// Exists. 	
 	}
 
+`Dump` and `Restore` help for data persistence:
+
+	m := rbac.Dump()
+	data, err := json.Marshal(m)
+	// Handling error or save data
+
+	var m gorbac.Map
+	err := json.Unmarshal(data, &m)
+	rbac = Restore(m)
+
 Authors
 =======
 

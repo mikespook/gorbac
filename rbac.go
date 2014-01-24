@@ -31,7 +31,7 @@ const (
 type AssertionFunc func(string, string, *Rbac) bool
 
 // Export RBAC to a structure data
-type RbacMap map[string]map[string][]string
+type Map map[string]map[string][]string
 
 // RBAC
 type Rbac struct {
@@ -56,7 +56,7 @@ func New() *Rbac {
 	return NewWithFactory(newBaseRole)
 }
 
-func RestoreWithFactory(data RbacMap, factory RoleFactoryFunc) *Rbac {
+func RestoreWithFactory(data Map, factory RoleFactoryFunc) *Rbac {
 	rbac := NewWithFactory(factory)
 	for role, value := range data {
 		rbac.Add(role, value[PermissionKey], value[ParentKey])
@@ -64,7 +64,7 @@ func RestoreWithFactory(data RbacMap, factory RoleFactoryFunc) *Rbac {
 	return rbac
 }
 
-func Restore(data RbacMap) *Rbac {
+func Restore(data Map) *Rbac {
 	return RestoreWithFactory(data, newBaseRole)
 }
 
@@ -143,8 +143,8 @@ func (rbac *Rbac) IsGranted(name, permission string,
 }
 
 // Dump RBAC
-func (rbac *Rbac) Dump() RbacMap {
-	m := make(RbacMap)
+func (rbac *Rbac) Dump() Map {
+	m := make(Map)
 	for _, role := range rbac.roles {
 		roleMap := make(map[string][]string)
 		roleMap[PermissionKey] = role.GetPermissions()
