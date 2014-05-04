@@ -91,7 +91,9 @@ In a real case, it is good for checking if a role existed:
 
 	var m gorbac.Map
 	err := json.Unmarshal(data, &m)
-	rbac = Restore(m)
+	rbac = gorbac.Restore(m)
+
+For more details, please see [example_test.go](https://github.com/mikespook/gorbac/blob/master/example_test.go) and [example/http](https://github.com/mikespook/gorbac/tree/master/examples/http).
 
 Authors
 =======
