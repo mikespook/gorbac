@@ -19,26 +19,26 @@ The role-c has been granted permis-a/b/c.
 The role-e has been granted permis-a/b/c/d.
 */
 func ExampleRbac() {
-	testingcases := map[string]map[string][]string {
+	testingcases := map[string]map[string][]string{
 		"role-a": map[string][]string{
 			"permissions": []string{"permis-a"},
-			"parents": nil,
+			"parents":     nil,
 		},
 		"role-b": map[string][]string{
 			"permissions": []string{"permis-b"},
-			"parents": nil,
+			"parents":     nil,
 		},
 		"role-c": map[string][]string{
 			"permissions": []string{"permis-c"},
-			"parents": []string{"role-a", "role-b"},
+			"parents":     []string{"role-a", "role-b"},
 		},
 		"role-d": map[string][]string{
 			"permissions": []string{"permis-d"},
-			"parents": nil,
+			"parents":     nil,
 		},
 		"role-e": map[string][]string{
 			"permissions": nil,
-			"parents": []string{"role-c", "role-d"},
+			"parents":     []string{"role-c", "role-d"},
 		},
 	}
 	rbac := gorbac.New()

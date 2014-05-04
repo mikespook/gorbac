@@ -31,26 +31,26 @@ Every roles have thire own permissions.
 
 */
 var (
-	testingcases = map[string]map[string][]string {
+	testingcases = map[string]map[string][]string{
 		RA: map[string][]string{
 			"permissions": []string{PA},
-			"parents": nil,
+			"parents":     nil,
 		},
 		RB: map[string][]string{
 			"permissions": []string{PB},
-			"parents": nil,
+			"parents":     nil,
 		},
 		RC: map[string][]string{
 			"permissions": []string{PC},
-			"parents": []string{RA, RB},
+			"parents":     []string{RA, RB},
 		},
 		RD: map[string][]string{
 			"permissions": []string{PD},
-			"parents": nil,
+			"parents":     nil,
 		},
 		RE: map[string][]string{
 			"permissions": nil,
-			"parents": []string{RC, RD},
+			"parents":     []string{RC, RD},
 		},
 	}
 
@@ -146,14 +146,14 @@ func BenchmarkRbacIsGranted(b *testing.B) {
 	for role, testingcase := range testingcases {
 		rbac.Set(role, testingcase["permissions"], testingcase["parents"])
 	}
-	for i := 0; i < b.N; i ++ {
+	for i := 0; i < b.N; i++ {
 		rbac.IsGranted(RE, PA, nil)
 	}
 }
 
 func BenchmarkRbacSet(b *testing.B) {
 	rbac := New()
-	for i := 0; i < b.N; i ++ {
+	for i := 0; i < b.N; i++ {
 		for role, testingcase := range testingcases {
 			rbac.Set(role, testingcase["permissions"], testingcase["parents"])
 		}
@@ -162,7 +162,7 @@ func BenchmarkRbacSet(b *testing.B) {
 
 func BenchmarkRbacAdd(b *testing.B) {
 	rbac := New()
-	for i := 0; i < b.N; i ++ {
+	for i := 0; i < b.N; i++ {
 		for role, testingcase := range testingcases {
 			rbac.Add(role, testingcase["permissions"], testingcase["parents"])
 		}
@@ -174,7 +174,7 @@ func BenchmarkDumpRestore(b *testing.B) {
 	for role, testingcase := range testingcases {
 		rbac.Add(role, testingcase["permissions"], testingcase["parents"])
 	}
-	for i := 0; i < b.N; i ++ {
+	for i := 0; i < b.N; i++ {
 		m := rbac.Dump()
 		rbac = Restore(m)
 	}
