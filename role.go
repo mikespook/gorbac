@@ -1,40 +1,58 @@
 package gorbac
 
+const (
+	ParentKey     = "parents"
+	PermissionKey = "permissions"
+	NameKey       = "name"
+)
+
 // Sometimes, a custom role structure is needed by projects.
 // You should define your own role factory function for this purpuse.
 type RoleFactoryFunc func(*Rbac, string) Role
 
+// An exportable data structure
+type RoleMap map[string][]string
+
+// An interface can't export directly. But you can convert it into a map.
+func RoleToMap(role Role) RoleMap {
+	roleMap := make(RoleMap)
+	roleMap[PermissionKey] = role.Permissions()
+	roleMap[ParentKey] = role.Parents()
+	roleMap[NameKey] = []string{role.Name()}
+	return roleMap
+}
+
 // Implement this interface for your own role structure.
 type Role interface {
-	GetName() string
+	Name() string
 	AddPermission(string)
 	HasPermission(string) bool
 	RevokePermission(string)
-	GetPermissions() []string
+	Permissions() []string
 	AddParent(string)
 	RemoveParent(string)
-	GetParents() []string
+	Parents() []string
 	Reset()
 }
 
 func newBaseRole(rbac *Rbac, name string) Role {
 	role := &baseRole{
-		rbac: rbac,
+		rbac:        rbac,
 		name:        name,
 		permissions: make(map[string]bool, bufferSize),
-		parents:    make(map[string]bool, bufferSize),
+		parents:     make(map[string]bool, bufferSize),
 	}
 	return role
 }
 
 type baseRole struct {
-	rbac	*Rbac
+	rbac        *Rbac
 	name        string
 	permissions map[string]bool
-	parents    map[string]bool
+	parents     map[string]bool
 }
 
-func (role *baseRole) GetName() string {
+func (role *baseRole) Name() string {
 	return role.name
 }
 
@@ -75,7 +93,7 @@ func (role *baseRole) Reset() {
 	role.parents = make(map[string]bool, bufferSize)
 }
 
-func (role *baseRole) GetPermissions() []string {
+func (role *baseRole) Permissions() []string {
 	result := make([]string, 0, len(role.permissions))
 	for name, _ := range role.permissions {
 		result = append(result, name)
@@ -83,7 +101,7 @@ func (role *baseRole) GetPermissions() []string {
 	return result
 }
 
-func (role *baseRole) GetParents() []string {
+func (role *baseRole) Parents() []string {
 	result := make([]string, 0, len(role.parents))
 	for name, _ := range role.parents {
 		result = append(result, name)

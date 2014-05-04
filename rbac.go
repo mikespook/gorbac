@@ -22,20 +22,17 @@ import (
 
 const (
 	bufferSize = 16
-
-	ParentKey = "parents"
-	PermissionKey = "permissions"
 )
 
 // Assertion function supplies more fine-grained permission controls.
 type AssertionFunc func(string, string, *Rbac) bool
 
 // Export RBAC to a structure data
-type Map map[string]map[string][]string
+type Map map[string]RoleMap
 
 // RBAC
 type Rbac struct {
-	mutex sync.RWMutex
+	mutex   sync.RWMutex
 	roles   map[string]Role
 	factory RoleFactoryFunc
 }
@@ -50,12 +47,13 @@ func NewWithFactory(factory RoleFactoryFunc) *Rbac {
 	return rbac
 }
 
-// Return a RBAC structure. 
+// Return a RBAC structure.
 // The default role structure will be used.
 func New() *Rbac {
 	return NewWithFactory(newBaseRole)
 }
 
+// Restore rbac from a map, use factory for your own data structure
 func RestoreWithFactory(data Map, factory RoleFactoryFunc) *Rbac {
 	rbac := NewWithFactory(factory)
 	for role, value := range data {
@@ -64,6 +62,7 @@ func RestoreWithFactory(data Map, factory RoleFactoryFunc) *Rbac {
 	return rbac
 }
 
+// Restore rbac from a map, a default role implamentation used
 func Restore(data Map) *Rbac {
 	return RestoreWithFactory(data, newBaseRole)
 }
@@ -108,7 +107,7 @@ func (rbac *Rbac) Remove(name string) {
 }
 
 // Internal getRole
-func  (rbac *Rbac) getRole(name string) Role {
+func (rbac *Rbac) getRole(name string) Role {
 	role, ok := rbac.roles[name]
 	if !ok {
 		role = rbac.factory(rbac, name)
@@ -118,7 +117,7 @@ func  (rbac *Rbac) getRole(name string) Role {
 }
 
 // Return a role or nil if not exists.
-func  (rbac *Rbac) Get(name string) Role {
+func (rbac *Rbac) Get(name string) Role {
 	rbac.mutex.RLock()
 	defer rbac.mutex.RUnlock()
 	role, ok := rbac.roles[name]
@@ -146,10 +145,8 @@ func (rbac *Rbac) IsGranted(name, permission string,
 func (rbac *Rbac) Dump() Map {
 	m := make(Map)
 	for _, role := range rbac.roles {
-		roleMap := make(map[string][]string)
-		roleMap[PermissionKey] = role.GetPermissions()
-		roleMap[ParentKey] = role.GetParents()
-		m[role.GetName()] = roleMap
+		roleMap := RoleToMap(role)
+		m[role.Name()] = roleMap
 	}
 	return m
 }
