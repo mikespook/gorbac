@@ -71,7 +71,7 @@ func Restore(data Map) *Rbac {
 // Set a role with `name`. It has `permissions` and `parents`.
 // If the role is not existing, a new one will be created.
 // This function will cover role's orignal permissions and parents.
-func (rbac *Rbac) Set(rank int, description, name string, permissions, parents []string) {
+func (rbac *Rbac) Set(rank int, name string, permissions, parents []string, description string) {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	role := rbac.getRole(name)
