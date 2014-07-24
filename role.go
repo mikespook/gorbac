@@ -1,9 +1,11 @@
 package gorbac
 
 const (
-	ParentKey     = "parents"
-	PermissionKey = "permissions"
-	NameKey       = "name"
+	ParentKey      = "parents"
+	PermissionKey  = "permissions"
+	NameKey        = "name"
+	RankKey        = "rank"
+	DescriptionKey = "description"
 )
 
 // Sometimes, a custom role structure is needed by projects.
@@ -11,20 +13,26 @@ const (
 type RoleFactoryFunc func(*Rbac, string) Role
 
 // An exportable data structure
-type RoleMap map[string][]string
+type RoleMap map[string]interface{}
 
 // An interface can't export directly. But you can convert it into a map.
 func RoleToMap(role Role) RoleMap {
 	roleMap := make(RoleMap)
 	roleMap[PermissionKey] = role.Permissions()
 	roleMap[ParentKey] = role.Parents()
-	roleMap[NameKey] = []string{role.Name()}
+	roleMap[NameKey] = role.Name()
+	roleMap[RankKey] = role.Rank()
+	roleMap[DescriptionKey] = role.Description()
 	return roleMap
 }
 
 // Implement this interface for your own role structure.
 type Role interface {
+	Rank() int
 	Name() string
+	Description() string
+	AddRank(int)
+	AddDescription(string)
 	AddPermission(string)
 	HasPermission(string) bool
 	RevokePermission(string)
@@ -47,13 +55,19 @@ func newBaseRole(rbac *Rbac, name string) Role {
 
 type baseRole struct {
 	rbac        *Rbac
+	rank        int
 	name        string
+	description string
 	permissions map[string]bool
 	parents     map[string]bool
 }
 
-func (role *baseRole) Name() string {
-	return role.name
+func (role *baseRole) AddRank(rank int) {
+	role.rank = rank
+}
+
+func (role *baseRole) AddDescription(description string) {
+	role.description = description
 }
 
 func (role *baseRole) AddPermission(permission string) {
@@ -107,4 +121,16 @@ func (role *baseRole) Parents() []string {
 		result = append(result, name)
 	}
 	return result
+}
+
+func (role *baseRole) Rank() int {
+	return role.rank
+}
+
+func (role *baseRole) Name() string {
+	return role.name
+}
+
+func (role *baseRole) Description() string {
+	return role.description
 }

@@ -17,6 +17,7 @@ Thus, RBAC has the following model:
 package gorbac
 
 import (
+	"strconv"
 	"sync"
 )
 
@@ -57,7 +58,7 @@ func New() *Rbac {
 func RestoreWithFactory(data Map, factory RoleFactoryFunc) *Rbac {
 	rbac := NewWithFactory(factory)
 	for role, value := range data {
-		rbac.Add(role, value[PermissionKey], value[ParentKey])
+		rbac.Add(value[RankKey].(int), role, value[PermissionKey].([]string), value[ParentKey].([]string), value[DescriptionKey].(string))
 	}
 	return rbac
 }
@@ -70,11 +71,13 @@ func Restore(data Map) *Rbac {
 // Set a role with `name`. It has `permissions` and `parents`.
 // If the role is not existing, a new one will be created.
 // This function will cover role's orignal permissions and parents.
-func (rbac *Rbac) Set(name string, permissions []string, parents []string) {
+func (rbac *Rbac) Set(rank int, name string, permissions, parents []string, description string) {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	role := rbac.getRole(name)
 	role.Reset()
+	role.AddRank(rank)
+	role.AddDescription(description)
 	for _, p := range permissions {
 		role.AddPermission(p)
 	}
@@ -87,10 +90,12 @@ func (rbac *Rbac) Set(name string, permissions []string, parents []string) {
 // If the role is not existing, a new one will be created.
 // This function will add new permissions and parents to the role,
 // and keep orignals.
-func (rbac *Rbac) Add(name string, permissions []string, parents []string) {
+func (rbac *Rbac) Add(rank int, name string, permissions, parents []string, description string) {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	role := rbac.getRole(name)
+	role.AddRank(rank)
+	role.AddDescription(description)
 	for _, p := range permissions {
 		role.AddPermission(p)
 	}
@@ -146,7 +151,7 @@ func (rbac *Rbac) Dump() Map {
 	m := make(Map)
 	for _, role := range rbac.roles {
 		roleMap := RoleToMap(role)
-		m[role.Name()] = roleMap
+		m[strconv.Itoa(role.Rank())+role.Name()] = roleMap
 	}
 	return m
 }
