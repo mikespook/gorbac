@@ -98,7 +98,7 @@ func main() {
 		return
 	}
 
-	h.AddRPC("/isgranded", isGranded)
+	h.AddRPC("/isgranted", isGranted)
 	fmt.Printf("[%s] %s\n", time.Now(), addr)
 	if err := http.ListenAndServe(addr, h); err != nil {
 		fmt.Println(err)
