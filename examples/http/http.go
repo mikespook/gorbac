@@ -4,103 +4,127 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mikespook/gorbac"
-	"github.com/mikespook/possum"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/mikespook/gorbac"
+	"github.com/mikespook/possum"
+	"github.com/mikespook/possum/router"
+	"github.com/mikespook/possum/view"
 )
 
 const addr = "127.0.0.1:12345"
 
-var rbac *myRbac
+var rbac = gorbac.New()
 
-type myRbac struct {
-	*gorbac.Rbac
-}
-
-func (rbac *myRbac) Post(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	body, err := ioutil.ReadAll(r.Body)
+func postHandler(ctx *possum.Context) error {
+	body, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
-		return http.StatusInternalServerError, err.Error()
+		return err
 	}
-	defer r.Body.Close()
+	defer ctx.Request.Body.Close()
 	var m gorbac.Map
 	if err := json.Unmarshal(body, &m); err != nil {
-		return http.StatusInternalServerError, err.Error()
+		return err
 	}
-	rbac.Rbac = gorbac.Restore(m)
-	return http.StatusOK, rbac.Rbac.Dump()
+	rbac = gorbac.Restore(m)
+	ctx.Response.Data = rbac.Dump()
+	return nil
 }
 
-func (rbac *myRbac) Get(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	name := r.Form.Get("name")
+func getHandler(ctx *possum.Context) error {
+	name := ctx.Request.Form.Get("name")
 	if name == "" {
-		return http.StatusOK, rbac.Rbac.Dump()
+		ctx.Response.Data = rbac.Dump()
+	} else {
+		ctx.Response.Data = gorbac.RoleToMap(rbac.Get(name))
 	}
-	return http.StatusOK, gorbac.RoleToMap(rbac.Rbac.Get(name))
+	return nil
 }
 
-func (rbac *myRbac) Put(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	name := r.Form.Get("name")
-	permissions := r.Form["permissions"]
-	parents := r.Form["parents"]
-	rbac.Rbac.Set(name, permissions, parents)
-	return http.StatusOK, gorbac.RoleToMap(rbac.Rbac.Get(name))
+func putHandler(ctx *possum.Context) error {
+	name := ctx.Request.Form.Get("name")
+	permissions := ctx.Request.Form["permissions"]
+	parents := ctx.Request.Form["parents"]
+	rbac.Set(name, permissions, parents)
+	ctx.Response.Data = gorbac.RoleToMap(rbac.Get(name))
+	return nil
 }
 
-func (rbac *myRbac) Delete(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	name := r.Form.Get("name")
-	role := rbac.Rbac.Get(name)
-	rbac.Rbac.Remove(name)
-	return http.StatusOK, gorbac.RoleToMap(role)
+func deleteHandler(ctx *possum.Context) error {
+	name := ctx.Request.Form.Get("name")
+	role := rbac.Get(name)
+	rbac.Remove(name)
+	ctx.Response.Data = gorbac.RoleToMap(role)
+	return nil
 }
 
-func (rbac *myRbac) Patch(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	name := r.Form.Get("name")
-	permissions := r.Form["permissions"]
-	parents := r.Form["parents"]
-	rbac.Rbac.Add(name, permissions, parents)
-	return http.StatusOK, gorbac.RoleToMap(rbac.Rbac.Get(name))
+func patchHandler(ctx *possum.Context) error {
+	name := ctx.Request.Form.Get("name")
+	permissions := ctx.Request.Form["permissions"]
+	parents := ctx.Request.Form["parents"]
+	rbac.Add(name, permissions, parents)
+	ctx.Response.Data = gorbac.RoleToMap(rbac.Get(name))
+	return nil
 }
 
-func isGranded(w http.ResponseWriter, r *http.Request) (status int, data interface{}) {
-	name := r.Form.Get("name")
-	permission := r.Form.Get("permission")
-	if rbac.Rbac.IsGranted(name, permission, nil) {
-		return http.StatusOK, gorbac.RoleToMap(rbac.Rbac.Get(name))
+func rbacHandler(ctx *possum.Context) error {
+	switch ctx.Request.Method {
+	case "PATCH":
+		return patchHandler(ctx)
+	case "GET":
+		return getHandler(ctx)
+	case "POST":
+		return postHandler(ctx)
+	case "DELETE":
+		return deleteHandler(ctx)
+	case "PUT":
+		return putHandler(ctx)
 	}
-	return http.StatusForbidden, nil
+	return nil
+}
+
+func isGrantedHandler(ctx *possum.Context) error {
+	ctx.Response.Header().Set("Test", "Hello world")
+	return nil
+	name := ctx.Request.Form.Get("name")
+	permission := ctx.Request.Form.Get("permission")
+	if rbac.IsGranted(name, permission, nil) {
+		ctx.Response.Status = http.StatusOK
+		ctx.Response.Data = true
+		return nil
+	}
+	ctx.Response.Status = http.StatusForbidden
+	ctx.Response.Data = false
+	return nil
 }
 
 func main() {
-	rbac = &myRbac{Rbac: gorbac.New()}
+	mux := possum.NewServerMux()
 
-	h := possum.NewHandler()
-	h.PreHandler = func(r *http.Request) (int, error) {
-		host, _, err := net.SplitHostPort(r.RemoteAddr)
+	mux.PreRequest = func(ctx *possum.Context) error {
+		host, _, err := net.SplitHostPort(ctx.Request.RemoteAddr)
 		if err != nil {
-			return http.StatusInternalServerError, err
+			return err
 		}
 		if host != "127.0.0.1" {
-			return http.StatusForbidden, fmt.Errorf("Localhost only")
+			return possum.NewError(http.StatusForbidden, "Localhost only")
 		}
-		return http.StatusOK, nil
+		return nil
 	}
 
-	h.PostHandler = func(r *http.Request, status int, data interface{}) {
-		fmt.Printf("[%s] %s %s \"%s\" %d\n", time.Now(), r.RemoteAddr, r.Method, r.URL.String(), status)
+	mux.PostResponse = func(ctx *possum.Context) error {
+		fmt.Printf("[%d] %s:%s \"%s\"", ctx.Response.Status,
+			ctx.Request.RemoteAddr, ctx.Request.Method,
+			ctx.Request.URL.String())
+		return nil
 	}
-
-	if err := h.AddResource("/rbac", rbac); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	h.AddRPC("/isgranted", isGranted)
+	mux.HandleFunc(router.Simple("/rbac"), rbacHandler, view.Json())
+	mux.HandleFunc(router.Simple("/isgranted"), isGrantedHandler, view.Json())
 	fmt.Printf("[%s] %s\n", time.Now(), addr)
-	if err := http.ListenAndServe(addr, h); err != nil {
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Println(err)
 		return
 	}
