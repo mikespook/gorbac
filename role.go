@@ -35,8 +35,8 @@ type Role interface {
 	Reset()
 }
 
-func newBaseRole(rbac *Rbac, name string) Role {
-	role := &baseRole{
+func NewBaseRole(rbac *Rbac, name string) Role {
+	role := &BaseRole{
 		rbac:        rbac,
 		name:        name,
 		permissions: make(map[string]bool, bufferSize),
@@ -45,22 +45,22 @@ func newBaseRole(rbac *Rbac, name string) Role {
 	return role
 }
 
-type baseRole struct {
+type BaseRole struct {
 	rbac        *Rbac
 	name        string
 	permissions map[string]bool
 	parents     map[string]bool
 }
 
-func (role *baseRole) Name() string {
+func (role *BaseRole) Name() string {
 	return role.name
 }
 
-func (role *baseRole) AddPermission(permission string) {
+func (role *BaseRole) AddPermission(permission string) {
 	role.permissions[permission] = true
 }
 
-func (role *baseRole) HasPermission(permission string) bool {
+func (role *BaseRole) HasPermission(permission string) bool {
 	if permit, ok := role.permissions[permission]; ok {
 		return permit
 	}
@@ -76,24 +76,24 @@ func (role *baseRole) HasPermission(permission string) bool {
 	return false
 }
 
-func (role *baseRole) RevokePermission(permission string) {
+func (role *BaseRole) RevokePermission(permission string) {
 	delete(role.permissions, permission)
 }
 
-func (role *baseRole) AddParent(name string) {
+func (role *BaseRole) AddParent(name string) {
 	role.parents[name] = true
 }
 
-func (role *baseRole) RemoveParent(name string) {
+func (role *BaseRole) RemoveParent(name string) {
 	delete(role.parents, name)
 }
 
-func (role *baseRole) Reset() {
+func (role *BaseRole) Reset() {
 	role.permissions = make(map[string]bool, bufferSize)
 	role.parents = make(map[string]bool, bufferSize)
 }
 
-func (role *baseRole) Permissions() []string {
+func (role *BaseRole) Permissions() []string {
 	result := make([]string, 0, len(role.permissions))
 	for name, _ := range role.permissions {
 		result = append(result, name)
@@ -101,7 +101,7 @@ func (role *baseRole) Permissions() []string {
 	return result
 }
 
-func (role *baseRole) Parents() []string {
+func (role *BaseRole) Parents() []string {
 	result := make([]string, 0, len(role.parents))
 	for name, _ := range role.parents {
 		result = append(result, name)

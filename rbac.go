@@ -50,7 +50,7 @@ func NewWithFactory(factory RoleFactoryFunc) *Rbac {
 // Return a RBAC structure.
 // The default role structure will be used.
 func New() *Rbac {
-	return NewWithFactory(newBaseRole)
+	return NewWithFactory(NewBaseRole)
 }
 
 // Restore rbac from a map, use factory for your own data structure
@@ -64,7 +64,7 @@ func RestoreWithFactory(data Map, factory RoleFactoryFunc) *Rbac {
 
 // Restore rbac from a map, a default role implamentation used
 func Restore(data Map) *Rbac {
-	return RestoreWithFactory(data, newBaseRole)
+	return RestoreWithFactory(data, NewBaseRole)
 }
 
 // Set a role with `name`. It has `permissions` and `parents`.
