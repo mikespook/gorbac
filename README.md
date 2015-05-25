@@ -37,13 +37,19 @@ Get a goRBAC instance:
 	
 	rbac := gorbac.New()
 
+gorbac.Role is an interface. That is you can use your own data structure to satisfy this interface.
+
+	rbac := gorbac.NewWithFactory(YourOwnFactory)
+
+However, `YourOwnFactory` should match the declaration of `gorabc.RoleFactoryFunc`.
+
 Specified permissions and parent roles for a role.
 If the role is not existing, new one will be created:
 	
 	rbac.Add("editor", []string{"edit.article"}, nil)	
 	rbac.Set("master", []string{"del.article"}, []string{"editor"})
 
-The mainly difference between `Add` and `Set` is: 
+The main difference between `Add` and `Set` is: 
 
  * `Add` keeps original permissions and parents which are already existed;
  * `Set` covers them with new permissions and parents.
@@ -93,7 +99,14 @@ In a real case, it is good for checking if a role existed:
 	err := json.Unmarshal(data, &m)
 	rbac = gorbac.Restore(m)
 
-For more details, please see [example_test.go](https://github.com/mikespook/gorbac/blob/master/example_test.go) and [example/http](https://github.com/mikespook/gorbac/tree/master/examples/http).
+If you want use user-defined data structures in data persistence, `RestoreWithFactory` would help you building RBAC instance with your own data structures.
+
+	var m gorbac.Map
+	err := json.Unmarshal(data, &m)
+	rbac = gorbac.RestoreWithFactory(m, YourOwnFactory)
+
+For more details, please see [example_test.go](https://github.com/mikespook/gorbac/blob/master/example_test.go).
+Also, there are two independent examples. [example/http](https://github.com/mikespook/gorbac/tree/master/examples/http) shows accessing RBAC instance through HTTP, and another illustrates how [user-defined](https://github.com/mikespook/gorbac/tree/master/examples/user-defined) roles work.
 
 Authors
 =======
