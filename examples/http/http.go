@@ -121,8 +121,8 @@ func main() {
 			ctx.Request.URL.String())
 		return nil
 	}
-	mux.HandleFunc(router.Simple("/rbac"), rbacHandler, view.Json())
-	mux.HandleFunc(router.Simple("/isgranted"), isGrantedHandler, view.Json())
+	mux.HandleFunc(router.Simple("/rbac"), rbacHandler, view.Json(view.CharSetUTF8))
+	mux.HandleFunc(router.Simple("/isgranted"), isGrantedHandler, view.Json(view.CharSetUTF8))
 	fmt.Printf("[%s] %s\n", time.Now(), addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Println(err)
