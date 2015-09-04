@@ -2,6 +2,7 @@ package gorbac
 
 import "fmt"
 
+// Return an error when detects any circle inheritance.
 func InherCircle(rbac *Rbac) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
