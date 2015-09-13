@@ -88,7 +88,6 @@ func rbacHandler(ctx *possum.Context) error {
 
 func isGrantedHandler(ctx *possum.Context) error {
 	ctx.Response.Header().Set("Test", "Hello world")
-	return nil
 	name := ctx.Request.Form.Get("name")
 	permission := ctx.Request.Form.Get("permission")
 	if rbac.IsGranted(name, permission, nil) {
