@@ -2,13 +2,13 @@ package gorbac
 
 import "fmt"
 
-// Return an error when detects any circle inheritance.
+// InherCircle returns an error when detecting any circle inheritance.
 func InherCircle(rbac *Rbac) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 
 	skipped := make(map[string]struct{})
-	stack := make([]string, 0)
+	var stack []string
 
 	for _, role := range rbac.roles {
 		if err := dfs(rbac, role, skipped, stack); err != nil {
