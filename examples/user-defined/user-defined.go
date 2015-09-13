@@ -18,7 +18,7 @@ func loadByName(name string) (label, description string) {
 	return name, "This is the description for " + name
 }
 
-func newMyRole(rbac *gorbac.Rbac, name string) gorbac.Role {
+func newMyRole(rbac *gorbac.RBAC, name string) gorbac.Role {
 	// loading extra properties by `name`.
 	label, desc := loadByName(name)
 	role := &myRole{

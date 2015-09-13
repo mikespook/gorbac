@@ -3,7 +3,7 @@ package gorbac
 import "fmt"
 
 // InherCircle returns an error when detecting any circle inheritance.
-func InherCircle(rbac *Rbac) error {
+func InherCircle(rbac *RBAC) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 
@@ -18,7 +18,7 @@ func InherCircle(rbac *Rbac) error {
 	return nil
 }
 
-func dfs(rbac *Rbac, role Role, skipped map[string]struct{}, stack []string) error {
+func dfs(rbac *RBAC, role Role, skipped map[string]struct{}, stack []string) error {
 	if _, ok := skipped[role.Name()]; ok {
 		return nil
 	}

@@ -56,7 +56,7 @@ var (
 	}
 )
 
-func prepareCase(cases map[string]map[string][]string) *Rbac {
+func prepareCase(cases map[string]map[string][]string) *RBAC {
 	rbac := New()
 
 	for role, c := range cases {
