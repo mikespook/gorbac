@@ -64,7 +64,7 @@ func (role *BaseRole) HasPermission(permission string) bool {
 	if permit, ok := role.permissions[permission]; ok {
 		return permit
 	}
-	for pname, _ := range role.parents {
+	for pname := range role.parents {
 		if parent := role.rbac.Get(pname); parent != nil {
 			if parent.HasPermission(permission) {
 				return true
@@ -95,7 +95,7 @@ func (role *BaseRole) Reset() {
 
 func (role *BaseRole) Permissions() []string {
 	result := make([]string, 0, len(role.permissions))
-	for name, _ := range role.permissions {
+	for name := range role.permissions {
 		result = append(result, name)
 	}
 	return result
@@ -103,7 +103,7 @@ func (role *BaseRole) Permissions() []string {
 
 func (role *BaseRole) Parents() []string {
 	result := make([]string, 0, len(role.parents))
-	for name, _ := range role.parents {
+	for name := range role.parents {
 		result = append(result, name)
 	}
 	return result

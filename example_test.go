@@ -35,25 +35,25 @@ const (
 */
 func ExampleRbac() {
 	normalCases := map[string]map[string][]string{
-		RA: map[string][]string{
-			"permissions": []string{PA},
-			"parents":     []string{RB},
+		RA: {
+			"permissions": {PA},
+			"parents":     {RB},
 		},
-		RB: map[string][]string{
-			"permissions": []string{PB},
-			"parents":     []string{RC, RD},
+		RB: {
+			"permissions": {PB},
+			"parents":     {RC, RD},
 		},
-		RC: map[string][]string{
-			"permissions": []string{PC},
+		RC: {
+			"permissions": {PC},
 			"parents":     nil,
 		},
-		RD: map[string][]string{
-			"permissions": []string{PD},
+		RD: {
+			"permissions": {PD},
 			"parents":     nil,
 		},
-		RE: map[string][]string{
+		RE: {
 			"permissions": nil,
-			"parents":     []string{RD},
+			"parents":     {RD},
 		},
 	}
 	rbac := gorbac.New()

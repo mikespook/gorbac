@@ -18,19 +18,19 @@ var (
 	   There is a circle: role-a, role-c, role-e.
 	*/
 	circleCases = map[string]map[string][]string{
-		RA: map[string][]string{
-			"parents": []string{RB},
+		RA: {
+			"parents": {RB},
 		},
-		RB: map[string][]string{
-			"parents": []string{RC, RD},
+		RB: {
+			"parents": {RC, RD},
 		},
-		RC: map[string][]string{
-			"parents": []string{RA},
+		RC: {
+			"parents": {RA},
 		},
-		RD: map[string][]string{
-			"parents": []string{RE},
+		RD: {
+			"parents": {RE},
 		},
-		RE: map[string][]string{
+		RE: {
 			"parents": nil,
 		},
 	}
@@ -47,20 +47,20 @@ var (
 	   There are two circles: 1) role-a, role-b, role-c; 2) role-b, role-d, role-e.
 	*/
 	circleCases2 = map[string]map[string][]string{
-		RA: map[string][]string{
-			"parents": []string{RB},
+		RA: {
+			"parents": {RB},
 		},
-		RB: map[string][]string{
-			"parents": []string{RC, RD},
+		RB: {
+			"parents": {RC, RD},
 		},
-		RC: map[string][]string{
-			"parents": []string{RA},
+		RC: {
+			"parents": {RA},
 		},
-		RD: map[string][]string{
-			"parents": []string{RE},
+		RD: {
+			"parents": {RE},
 		},
-		RE: map[string][]string{
-			"parents": []string{RB},
+		RE: {
+			"parents": {RB},
 		},
 	}
 )
