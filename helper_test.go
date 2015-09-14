@@ -93,6 +93,37 @@ func TestInherNormal(t *testing.T) {
 	}
 }
 
+func TestAllGranted(t *testing.T) {
+	rbac := prepareCase(normalCases)
+
+	// All roles have PD
+	roles := []string{RA, RB, RE}
+	if !AllGranted(rbac, roles, PD, nil) {
+		t.Errorf("All roles(%v) were expected having %s, but they weren't.", roles, PD)
+	}
+
+	roles = []string{RA, RB, RC}
+	if AllGranted(rbac, roles, PD, nil) {
+		t.Errorf("Not all roles(%v) were expected having %s, but they were.", roles, PD)
+	}
+}
+
+func TestAnyGranted(t *testing.T) {
+	rbac := prepareCase(normalCases)
+
+	// All roles have PD
+	roles := []string{RA, RB, RE}
+	if !AnyGranted(rbac, roles, PD, nil) {
+		t.Errorf("One of roles(%v) was expected having %s, but it wasn't.", roles, PD)
+	}
+
+	roles = []string{RB, RC, RE}
+	if AnyGranted(rbac, roles, PA, nil) {
+		t.Errorf("None of roles(%v) were expected having %s, but it was.", roles, PA)
+	}
+
+}
+
 func BenchmarkInherCircle(b *testing.B) {
 	rbac := prepareCase(circleCases)
 

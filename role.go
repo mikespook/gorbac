@@ -77,7 +77,7 @@ func (role *BaseRole) HasPermission(permission string) bool {
 		return permit
 	}
 	for pname := range role.parents {
-		if parent := role.rbac.Get(pname); parent != nil {
+		if parent := role.rbac.get(pname); parent != nil {
 			if parent.HasPermission(permission) {
 				return true
 			}

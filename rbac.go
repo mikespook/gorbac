@@ -121,6 +121,10 @@ func (rbac *RBAC) getRole(name string) Role {
 func (rbac *RBAC) Get(name string) Role {
 	rbac.mutex.RLock()
 	defer rbac.mutex.RUnlock()
+	return rbac.get(name)
+}
+
+func (rbac *RBAC) get(name string) Role {
 	role, ok := rbac.roles[name]
 	if !ok {
 		return nil
@@ -133,6 +137,11 @@ func (rbac *RBAC) IsGranted(name, permission string,
 	assert AssertionFunc) bool {
 	rbac.mutex.RLock()
 	defer rbac.mutex.RUnlock()
+	return rbac.isGranted(name, permission, assert)
+}
+
+func (rbac *RBAC) isGranted(name, permission string,
+	assert AssertionFunc) bool {
 	if assert != nil && !assert(name, permission, rbac) {
 		return false
 	}
