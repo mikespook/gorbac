@@ -59,18 +59,18 @@ func ExampleRbac() {
 	rbac := gorbac.New()
 
 	for role, c := range normalCases {
-		rbac.Add(role, c["permissions"], c["parents"])
+		rbac.Add(role, convPermissions(c["permissions"]), c["parents"])
 	}
 
-	if rbac.IsGranted(RA, PA, nil) &&
-		rbac.IsGranted(RA, PB, nil) &&
-		rbac.IsGranted(RA, PC, nil) &&
-		rbac.IsGranted(RA, PD, nil) {
+	if rbac.IsGranted(RA, gorbac.NewStdPermission(PA), nil) &&
+		rbac.IsGranted(RA, gorbac.NewStdPermission(PB), nil) &&
+		rbac.IsGranted(RA, gorbac.NewStdPermission(PC), nil) &&
+		rbac.IsGranted(RA, gorbac.NewStdPermission(PD), nil) {
 		fmt.Println("The role-a has been granted permis-a, b, c and d.")
 	}
-	if rbac.IsGranted(RB, PB, nil) &&
-		rbac.IsGranted(RB, PC, nil) &&
-		rbac.IsGranted(RB, PD, nil) {
+	if rbac.IsGranted(RB, gorbac.NewStdPermission(PB), nil) &&
+		rbac.IsGranted(RB, gorbac.NewStdPermission(PC), nil) &&
+		rbac.IsGranted(RB, gorbac.NewStdPermission(PD), nil) {
 		fmt.Println("The role-b has been granted permis-b, c and d.")
 	}
 	// When a circle inheratance ocurred,
@@ -83,4 +83,11 @@ func ExampleRbac() {
 	// The role-a has been granted permis-a, b, c and d.
 	// The role-b has been granted permis-b, c and d.
 	// A circle inheratance ocurred.
+}
+
+func convPermissions(a []string) (ps []gorbac.Permission) {
+	for _, v := range a {
+		ps = append(ps, gorbac.NewStdPermission(v))
+	}
+	return
 }

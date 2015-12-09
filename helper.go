@@ -42,7 +42,7 @@ func dfs(rbac *RBAC, role Role, skipped map[string]struct{}, stack []string) err
 }
 
 // AnyGranted checks if any role has the permission.
-func AnyGranted(rbac *RBAC, roles []string, permission string,
+func AnyGranted(rbac *RBAC, roles []string, permission Permission,
 	assert AssertionFunc) bool {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
@@ -55,7 +55,7 @@ func AnyGranted(rbac *RBAC, roles []string, permission string,
 }
 
 // AllGranted checks if all roles have the permission.
-func AllGranted(rbac *RBAC, roles []string, permission string,
+func AllGranted(rbac *RBAC, roles []string, permission Permission,
 	assert AssertionFunc) bool {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()

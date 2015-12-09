@@ -1,5 +1,7 @@
 package gorbac
 
+import "encoding/json"
+
 const (
 	// ParentKey exports parents into RoleMap
 	ParentKey = "parents"
@@ -15,12 +17,12 @@ const (
 type RoleFactoryFunc func(*RBAC, string) Role
 
 // RoleMap exports roles data.
-type RoleMap map[string][]string
+type RoleMap map[string]interface{}
 
 // RoleToMap converts interface Role into RoleMap.
 func RoleToMap(role Role) RoleMap {
 	roleMap := make(RoleMap)
-	roleMap[PermissionKey] = role.Permissions()
+	//	roleMap[PermissionKey] = role.permissions()
 	roleMap[ParentKey] = role.Parents()
 	roleMap[NameKey] = []string{role.Name()}
 	return roleMap
@@ -30,67 +32,104 @@ func RoleToMap(role Role) RoleMap {
 // You should implement this interface for your own role structures.
 type Role interface {
 	Name() string
-	AddPermission(string)
-	HasPermission(string) bool
-	RevokePermission(string)
-	Permissions() []string
+	AddPermission(Permission)
+	HasPermission(Permission) bool
+	RevokePermission(Permission)
 	AddParent(string)
 	RemoveParent(string)
-	Parents() []string
 	Reset()
+
+	Parents() []string
+
 	MarshalText() ([]byte, error)
 	UnmarshalText([]byte) error
 }
 
-// NewBaseRole is the default role factory function.
+type Parents map[string]interface{}
+
+// NewStdRole is the default role factory function.
 // It matches the declaration to RoleFactoryFunc.
-func NewBaseRole(rbac *RBAC, name string) Role {
-	role := &BaseRole{
+func NewStdRole(rbac *RBAC, name string) Role {
+	role := &StdRole{
 		rbac:        rbac,
 		name:        name,
-		permissions: make(map[string]bool, bufferSize),
-		parents:     make(map[string]bool, bufferSize),
+		permissions: make(Permissions),
+		parents:     make(Parents),
 	}
 	return role
 }
 
-// BaseRole is the default role implement.
+// StdRole is the default role implement.
 // You can combine this struct into your own Role implement.
-type BaseRole struct {
+type StdRole struct {
 	rbac        *RBAC
 	name        string
-	permissions map[string]bool
-	parents     map[string]bool
+	permissions Permissions
+	parents     Parents
 }
 
-// MarshalText encodes a BaseRole into JSON format.
-func (role *BaseRole) MarshalText() (text []byte, err error) {
-	return nil, nil
+// MarshalText encodes a StdRole into JSON format.
+func (role *StdRole) MarshalText() (text []byte, err error) {
+	data := map[string]interface{}{
+		"name":        role.name,
+		"parents":     role.Parents(),
+		"permissions": role._permissions(),
+	}
+	return json.Marshal(data)
 }
 
-// UnmarshalText decodes a JSON format into BaseRole.
-func (role *BaseRole) UnmarshalText(text []byte) error {
+// UnmarshalText decodes a JSON format into StdRole.
+func (role *StdRole) UnmarshalText(text []byte) error {
+	var data map[string]interface{}
+	if err := json.Unmarshal(text, &data); err != nil {
+		return err
+	}
+	var ok bool
+	if role.name, ok = data["name"].(string); !ok {
+		return ErrUnmarshal
+	}
+	parents, ok := data["parents"].([]interface{})
+	if !ok {
+		return ErrUnmarshal
+	}
+	for _, v := range parents {
+		if name, ok := v.(string); ok {
+			role.parents[name] = nil
+		}
+	}
+	permissions, ok := data["permissions"].([]interface{})
+	if !ok {
+		return ErrUnmarshal
+	}
+	for _, v := range permissions {
+		p, ok := v.(Permission)
+		if ok {
+			role.permissions[p.Name()] = p
+		}
+	}
 	return nil
 }
 
 // Name returns the role's identity name.
-func (role *BaseRole) Name() string {
+func (role *StdRole) Name() string {
 	return role.name
 }
 
 // AddPermission adds a permission to the role.
-func (role *BaseRole) AddPermission(permission string) {
-	role.permissions[permission] = true
+func (role *StdRole) AddPermission(p Permission) {
+	role.permissions[p.Name()] = p
 }
 
 // HasPermission returns true if the role has specific permission.
-func (role *BaseRole) HasPermission(permission string) bool {
-	if permit, ok := role.permissions[permission]; ok {
-		return permit
+func (role *StdRole) HasPermission(p Permission) bool {
+	for _, rp := range role.permissions {
+		if rp.Has(p) {
+			return true
+		}
 	}
 	for pname := range role.parents {
 		if parent := role.rbac.get(pname); parent != nil {
-			if parent.HasPermission(permission) {
+			if parent.HasPermission(p) {
 				return true
 			}
 		} else {
@@ -101,37 +140,37 @@ func (role *BaseRole) HasPermission(permission string) bool {
 }
 
 // RevokePermission remove the specific permission.
-func (role *BaseRole) RevokePermission(permission string) {
-	delete(role.permissions, permission)
+func (role *StdRole) RevokePermission(p Permission) {
+	delete(role.permissions, p.Name())
 }
 
 // AddParent adds a parent to the role.
-func (role *BaseRole) AddParent(name string) {
-	role.parents[name] = true
+func (role *StdRole) AddParent(name string) {
+	role.parents[name] = nil
 }
 
 // RemoveParent deletes the specific parent from the role.
-func (role *BaseRole) RemoveParent(name string) {
+func (role *StdRole) RemoveParent(name string) {
 	delete(role.parents, name)
 }
 
 // Reset cleans all permissions and parents.
-func (role *BaseRole) Reset() {
-	role.permissions = make(map[string]bool, bufferSize)
-	role.parents = make(map[string]bool, bufferSize)
+func (role *StdRole) Reset() {
+	role.permissions = make(map[string]Permission)
+	role.parents = make(map[string]interface{})
 }
 
 // Permissions returns all permissions into a slice.
-func (role *BaseRole) Permissions() []string {
-	result := make([]string, 0, len(role.permissions))
-	for name := range role.permissions {
-		result = append(result, name)
+func (role *StdRole) _permissions() []Permission {
+	result := make([]Permission, 0, len(role.permissions))
+	for _, p := range role.permissions {
+		result = append(result, p)
 	}
 	return result
 }
 
 // Parents returns all parents into a slice.
-func (role *BaseRole) Parents() []string {
+func (role *StdRole) Parents() []string {
 	result := make([]string, 0, len(role.parents))
 	for name := range role.parents {
 		result = append(result, name)

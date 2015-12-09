@@ -9,9 +9,23 @@ type Permission interface {
 	UnmarshalText([]byte) error
 }
 
+type Permissions map[string]Permission
+
+func (ps Permissions) MarshalText() (text []byte, err error) {
+	return json.Marshal(ps)
+}
+
+func (ps Permissions) UnmarshalText(text []byte) error {
+	return json.Unmarshal(text, &ps)
+}
+
 // StdPermission checks if the name of permission matched.
 type StdPermission struct {
 	name string
+}
+
+func NewStdPermission(name string) *StdPermission {
+	return &StdPermission{name}
 }
 
 func (p *StdPermission) Name() string {
@@ -38,6 +52,10 @@ func (p *StdPermission) UnmarshalText(text []byte) error {
 type LayerPermission struct {
 	name   string
 	layers []string
+}
+
+func NewLayerPermission(name string, layers []string) *LayerPermission {
+	return &LayerPermission{name, layers}
 }
 
 func (p *LayerPermission) Name() string {
