@@ -17,11 +17,16 @@ Thus, RBAC has the following model:
 package gorbac
 
 import (
+	"fmt"
 	"sync"
 )
 
 const (
 	bufferSize = 16
+)
+
+var (
+	ErrUnmarshal = fmt.Errorf("Unmarshal error")
 )
 
 // AssertionFunc supplies more fine-grained permission controls.

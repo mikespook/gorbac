@@ -38,6 +38,8 @@ type Role interface {
 	RemoveParent(string)
 	Parents() []string
 	Reset()
+	MarshalText() ([]byte, error)
+	UnmarshalText([]byte) error
 }
 
 // NewBaseRole is the default role factory function.
@@ -59,6 +61,16 @@ type BaseRole struct {
 	name        string
 	permissions map[string]bool
 	parents     map[string]bool
+}
+
+// MarshalText encodes a BaseRole into JSON format.
+func (role *BaseRole) MarshalText() (text []byte, err error) {
+	return nil, nil
+}
+
+// UnmarshalText decodes a JSON format into BaseRole.
+func (role *BaseRole) UnmarshalText(text []byte) error {
+	return nil
 }
 
 // Name returns the role's identity name.
