@@ -6,65 +6,51 @@ import (
 )
 
 func TestStdPermission(t *testing.T) {
-	// permission a
-	pa := &StdPermission{PA}
-	// permission b
-	pb := &StdPermission{PB}
-	// another instance of permission a
-	paa := &StdPermission{PA}
-	// different instance, matched permission
-	if !pa.Has(paa) {
-		t.Errorf("%s should have the permission", pa.Name())
+	profile1 := NewStdPermission("profile")
+	profile2 := NewStdPermission("profile")
+	admin := NewStdPermission("admin")
+	if !profile1.Match(profile2) {
+		t.Errorf("%s should have the permission", profile1.Id())
 	}
-	// same instance, matched permission
-	if !pa.Has(pa) {
-		t.Errorf("%s should have the permission", pa.Name())
+	if !profile1.Match(profile1) {
+		t.Errorf("%s should have the permission", profile1.Id())
 	}
-	// unmatched permission
-	if pa.Has(pb) {
-		t.Errorf("%s should not have the permission", pa.Name())
+	if profile1.Match(admin) {
+		t.Errorf("%s should not have the permission", profile1.Id())
 	}
-	text, err := json.Marshal(pa)
+	text, err := json.Marshal(profile1)
 	if err != nil {
 		t.Error(err)
 	}
-	if string(text) == PA {
-		t.Errorf("%s expected, but %s got", PA, text)
+	if string(text) == "\"profile\"" {
+		t.Errorf("[\"profile\"] expected, but %s got", text)
 	}
 	var p StdPermission
 	if err := json.Unmarshal(text, &p); err != nil {
 		t.Error(err)
 	}
-	if p.Name() != PA {
-		t.Errorf("%s expected, but %s got", PA, p.Name())
+	if p.Id() != "profile" {
+		t.Errorf("[profile] expected, but %s got", p.Id())
 	}
 }
 
 func TestLayerPermission(t *testing.T) {
-	// permission a with `admin` layer
-	pa := &LayerPermission{PA, []string{"admin"}}
-	// permission b with `profile` layer
-	pb := &LayerPermission{PB, []string{"profile"}}
-	// another instance of permission a
-	paa := &LayerPermission{PA, []string{"admin"}}
-	// permission aaa with `admin.dashboard` layer.
-	// If a role is granted `pa`, then it has `paaa` automatically.
-	paaa := &LayerPermission{PC, []string{"admin", "dashboard"}}
-	// If a role is granted `pa`, then it has `paab` automatically.
-	paab := &LayerPermission{PD, []string{"admin", "password"}}
-	// different instance, matched permission
-	if !pa.Has(paa) {
-		t.Errorf("%s should have the permission", pa.Name())
+	profile1 := NewLayerPermission("profile", ":")
+	profile2 := NewLayerPermission("profile", ":")
+	admin := NewLayerPermission("admin", ":")
+	admindashboard := NewLayerPermission("admin:dashboard", ":")
+	adminpassword := NewLayerPermission("admin:password", ":")
+
+	if !profile1.Match(profile1) {
+		t.Errorf("%s should have the permission", profile1.Id())
 	}
-	// same instance, matched permission
-	if !pa.Has(pa) {
-		t.Errorf("%s should have the permission", pa.Name())
+	if !profile1.Match(profile2) {
+		t.Errorf("%s should have the permission", profile1.Id())
 	}
-	// unmatched permission
-	if pa.Has(pb) {
-		t.Errorf("%s should not have the permission", pa.Name())
+	if profile1.Match(admin) {
+		t.Errorf("%s should not have the permission", profile1.Id())
 	}
-	text, err := json.Marshal(pa)
+	text, err := json.Marshal(admin)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,16 +58,16 @@ func TestLayerPermission(t *testing.T) {
 	if err := json.Unmarshal(text, &p); err != nil {
 		t.Error(err)
 	}
-	if p.Name() != PA {
-		t.Errorf("%s expected, but %s got", PA, p.Name())
+	if p.Id() != "admin" {
+		t.Errorf("[admin] expected, but %s got", p.Id())
 	}
-	if !p.Has(paaa) {
-		t.Errorf("%s should have the permission", p.Name())
+	if !p.Match(admindashboard) {
+		t.Errorf("%s should have the permission", p.Id())
 	}
-	if paaa.Has(paab) {
-		t.Errorf("%s should not have the permission", paaa.Name())
+	if admindashboard.Match(&p) {
+		t.Errorf("%s should not have the permission", admindashboard.Id())
 	}
-	if paaa.Has(pa) {
-		t.Errorf("%s should not have the permission", paaa.Name())
+	if adminpassword.Match(admindashboard) {
+		t.Errorf("%s should not have the permission", adminpassword.Id())
 	}
 }

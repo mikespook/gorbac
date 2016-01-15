@@ -1,10 +1,14 @@
 package gorbac
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+	"strings"
+)
 
 type Permission interface {
-	Name() string
-	Has(Permission) bool
+	Id() string
+	Match(Permission) bool
 	MarshalText() ([]byte, error)
 	UnmarshalText([]byte) error
 }
@@ -19,63 +23,75 @@ func (ps Permissions) UnmarshalText(text []byte) error {
 	return json.Unmarshal(text, &ps)
 }
 
-// StdPermission checks if the name of permission matched.
+// StdPermission only checks if the Ids are fully matching.
 type StdPermission struct {
-	name string
+	IdStr string
 }
 
-func NewStdPermission(name string) *StdPermission {
-	return &StdPermission{name}
+func NewStdPermission(id string) *StdPermission {
+	return &StdPermission{id}
 }
 
-func (p *StdPermission) Name() string {
-	return p.name
+func (p *StdPermission) Id() string {
+	return p.IdStr
 }
 
-func (p *StdPermission) Has(a Permission) bool {
-	return p.name == a.Name()
+func (p *StdPermission) Match(a Permission) bool {
+	return p.IdStr == a.Id()
 }
 
 func (p *StdPermission) MarshalText() (text []byte, err error) {
-	return []byte(p.name), nil
+	var buf bytes.Buffer
+	if _, err := buf.WriteRune('"'); err != nil {
+		return nil, err
+	}
+	if _, err := buf.WriteString(p.IdStr); err != nil {
+		return nil, err
+	}
+	if _, err := buf.WriteRune('"'); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func (p *StdPermission) UnmarshalText(text []byte) error {
-	p.name = string(text)
+	p.IdStr = string(bytes.Trim(text, "\""))
 	return nil
 }
 
-// LayerPermission firstly checks the name of permission.
-// If the name is matched, it can be considered having the permission.
+// LayerPermission firstly checks the Id of permission.
+// If the Id is matched, it can be consIdered having the permission.
 // Otherwise, it checks every layers of permission.
 // A role which has an upper layer granted, will be granted sub-layers permissions.
 type LayerPermission struct {
-	name   string
-	layers []string
+	IdStr string `json:"id"`
+	Sep   string `json:"sep"`
 }
 
-func NewLayerPermission(name string, layers []string) *LayerPermission {
-	return &LayerPermission{name, layers}
+func NewLayerPermission(id, sep string) *LayerPermission {
+	return &LayerPermission{id, sep}
 }
 
-func (p *LayerPermission) Name() string {
-	return p.name
+func (p *LayerPermission) Id() string {
+	return p.IdStr
 }
 
-func (p *LayerPermission) Has(a Permission) bool {
-	if p.name == a.Name() {
+func (p *LayerPermission) Match(a Permission) bool {
+	if p.IdStr == a.Id() {
 		return true
 	}
-	alp, ok := a.(*LayerPermission)
-	// layers of a should be less than that of p
+	q, ok := a.(*LayerPermission)
 	if !ok {
 		return false
 	}
-	if len(p.layers) > len(alp.layers) {
+	players := strings.Split(p.IdStr, p.Sep)
+	qlayers := strings.Split(q.IdStr, q.Sep)
+	// layer counts of q should be less than that of p
+	if len(players) > len(qlayers) {
 		return false
 	}
-	for k, pv := range p.layers {
-		if pv != alp.layers[k] {
+	for k, pv := range players {
+		if pv != qlayers[k] {
 			return false
 		}
 	}
@@ -83,32 +99,12 @@ func (p *LayerPermission) Has(a Permission) bool {
 }
 
 func (p *LayerPermission) MarshalText() (text []byte, err error) {
-	v := map[string]interface{}{
-		"name":  p.name,
-		"layer": p.layers,
-	}
-	return json.Marshal(v)
+	return json.Marshal(p)
 }
 
 func (p *LayerPermission) UnmarshalText(text []byte) error {
-	var data map[string]interface{}
-	if err := json.Unmarshal(text, &data); err != nil {
+	if err := json.Unmarshal(text, &p); err != nil {
 		return err
-	}
-	var ok bool
-	if p.name, ok = data["name"].(string); !ok {
-		return ErrUnmarshal
-	}
-	layer, ok := data["layer"].([]interface{})
-	if !ok {
-		return ErrUnmarshal
-	}
-	for _, v := range layer {
-		l, ok := v.(string)
-		if !ok {
-			return ErrUnmarshal
-		}
-		p.layers = append(p.layers, l)
 	}
 	return nil
 }
