@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mikespook/gorbac"
 	"github.com/mikespook/possum"
 	"github.com/mikespook/possum/router"
 	"github.com/mikespook/possum/view"
+	"gopkg.in/mikespook/gorbac.v1"
 )
 
 const addr = "127.0.0.1:12345"

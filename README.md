@@ -1,9 +1,8 @@
-goRBAC
-======
+goRBAC V1
+=========
 
-[![Build Status](https://travis-ci.org/mikespook/gorbac.png?branch=master)](https://travis-ci.org/mikespook/gorbac)
-[![GoDoc](https://godoc.org/github.com/mikespook/gorbac?status.png)](https://godoc.org/github.com/mikespook/gorbac)
-[![Coverage Status](https://coveralls.io/repos/mikespook/gorbac/badge.svg?branch=master&service=github)](https://coveralls.io/github/mikespook/gorbac?branch=master)
+[![Build Status](https://travis-ci.org/mikespook/gorbac.png?branch=v1)](https://travis-ci.org/mikespook/gorbac)
+[![GoDoc](https://godoc.org/gopkg.in/mikespook/gorbac.v1?status.png)](https://godoc.org/gopkg.in/mikespook/gorbac.v1)
 
 goRBAC provides a lightweight role-based access control implementation
 in Golang.
@@ -25,14 +24,14 @@ Install
 
 Install the package:
 
-> $ go get github.com/mikespook/gorbac
+> $ go get gopkg.in/mikespook/gorbac.v1
 	
 Usage
 =====
 
 Import the package:
 
-	import github.com/mikespook/gorbac
+	import gopkg.in/mikespook/gorbac.v1
 
 Get a goRBAC instance:
 	

@@ -3,7 +3,7 @@ package gorbac_test
 import (
 	"fmt"
 
-	"github.com/mikespook/gorbac"
+	"gopkg.in/mikespook/gorbac.v1"
 )
 
 const (
