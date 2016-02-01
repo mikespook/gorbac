@@ -1,9 +1,15 @@
-goRBAC
+goRBAC 
 ======
+
+__NOTE:__
+	1. _The original master branch has been moved to the branch 
+	[v1.dev](https://github.com/mikespook/gorbac/tree/v1.dev) 
+	with stable release tag [v1.0](https://github.com/mikespook/gorbac/tree/v1.0)._
+	2. _Current master comes from the redesign branch and is under heavy construction.
+	DO NOT USE!_
 
 [![Build Status](https://travis-ci.org/mikespook/gorbac.png?branch=master)](https://travis-ci.org/mikespook/gorbac)
 [![GoDoc](https://godoc.org/github.com/mikespook/gorbac?status.png)](https://godoc.org/github.com/mikespook/gorbac)
-[![Coverage Status](https://coveralls.io/repos/mikespook/gorbac/badge.svg?branch=master&service=github)](https://coveralls.io/github/mikespook/gorbac?branch=master)
 
 goRBAC provides a lightweight role-based access control implementation
 in Golang.
@@ -20,94 +26,16 @@ Thus, RBAC has the following model:
 	* many to many relationship between roles and permissions.
 	* roles can have a parent role (inheriting permissions).
 
+
 Install
 =======
 
-Install the package:
-
-> $ go get github.com/mikespook/gorbac
+_TO BE DONE_
 	
 Usage
 =====
 
-Import the package:
-
-	import github.com/mikespook/gorbac
-
-Get a goRBAC instance:
-	
-	rbac := gorbac.New()
-
-gorbac.Role is an interface. That is you can use your own data structure to satisfy this interface.
-
-	rbac := gorbac.NewWithFactory(YourOwnFactory)
-
-However, `YourOwnFactory` should match the declaration of `gorabc.RoleFactoryFunc`.
-
-Specified permissions and parent roles for a role.
-If the role is not existing, new one will be created:
-	
-	rbac.Add("editor", []string{"edit.article"}, nil)	
-	rbac.Set("master", []string{"del.article"}, []string{"editor"})
-
-The main difference between `Add` and `Set` is: 
-
- * `Add` keeps original permissions and parents which are already existed;
- * `Set` covers them with new permissions and parents.
-
-Remove a role:
-
-	rbac.Remove("guest")
-
-Get a role for more fine-grained controls:
-
-	rbac.Get("admin")
-
-Check if a role has a permission:
-	
-	rbac.IsGranted("editor", "edit.article", nil)
-
-The 3rd param, Assertion function is used for more fine-grained testing:
-
-	rbac.IsGranted("editor", "edit.article", 
-		func(role, permission string, rbac* Rbac) bool {
-			return article.Owner == User.Id
-	})
-
-Revoke a permission from a role:
-
-	rbac.Get("master").RevokePermission("del.article")
-
-Remove a role's parent:
-
-	rbac.Get("editor").RemoveParent("auth-user")
-
-In a real case, it is good for checking if a role existed:
-
-	if role := rbac.Get("not-exists"); role == nil {
-		// Not exists;
-	} else {
-		// Exists. 	
-	}
-
-`Dump` and `Restore` help for data persistence:
-
-	m := rbac.Dump()
-	data, err := json.Marshal(m)
-	// Handling error or save data
-
-	var m gorbac.Map
-	err := json.Unmarshal(data, &m)
-	rbac = gorbac.Restore(m)
-
-If you want use user-defined data structures in data persistence, `RestoreWithFactory` would help you building RBAC instance with your own data structures.
-
-	var m gorbac.Map
-	err := json.Unmarshal(data, &m)
-	rbac = gorbac.RestoreWithFactory(m, YourOwnFactory)
-
-For more details, please see [example_test.go](https://github.com/mikespook/gorbac/blob/master/example_test.go).
-Also, there are two independent examples. [example/http](https://github.com/mikespook/gorbac/tree/master/examples/http) shows accessing RBAC instance through HTTP, and another illustrates how [user-defined](https://github.com/mikespook/gorbac/tree/master/examples/user-defined) roles work.
+_TO BE DONE_
 
 Authors
 =======
