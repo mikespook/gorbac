@@ -2,9 +2,11 @@ goRBAC
 ======
 
 __NOTE:__
+
 	1. _The original master branch has been moved to the branch 
 	[v1.dev](https://github.com/mikespook/gorbac/tree/v1.dev) 
 	with stable release tag [v1.0](https://github.com/mikespook/gorbac/tree/v1.0)._
+
 	2. _Current master comes from the redesign branch and is under heavy construction.
 	DO NOT USE!_
 
