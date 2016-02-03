@@ -24,6 +24,7 @@ import (
 var (
 	ErrRoleNotExist = errors.New("Role does not exist")
 	ErrRoleExist    = errors.New("Role has already existed")
+	empty           = struct{}{}
 )
 
 // AssertionFunc supplies more fine-grained permission controls.
@@ -64,7 +65,6 @@ func (rbac *RBAC) SetParents(id string, parents []string) error {
 	if _, ok := rbac.parents[id]; !ok {
 		rbac.parents[id] = make(map[string]struct{})
 	}
-	var empty struct{}
 	for _, parent := range parents {
 		rbac.parents[id][parent] = empty
 	}
@@ -181,6 +181,10 @@ func (rbac *RBAC) Get(id string) (Role, []string, error) {
 func (rbac *RBAC) IsGranted(id string, p Permission, assert AssertionFunc) bool {
 	rbac.mutex.RLock()
 	defer rbac.mutex.RUnlock()
+	return rbac.isGranted(id, p, assert)
+}
+
+func (rbac *RBAC) isGranted(id string, p Permission, assert AssertionFunc) bool {
 	if assert != nil && !assert(rbac, id, p) {
 		return false
 	}

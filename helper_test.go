@@ -5,79 +5,27 @@ import (
 )
 
 var (
-
-	/*
-	   Suppose:
-
-	   The role-a is inheriting from role-b.
-	   The role-b is inheriting from role-c, role-d.
-	   The role-c is inheriting from role-a.
-	   The role-d is inheriting from role-e.
-	   The role-e is individual.
-
-	   There is a circle: role-a, role-c, role-e.
-	*/
-	circleCases = map[string]map[string][]string{
-		RA: {
-			"parents": {RB},
-		},
-		RB: {
-			"parents": {RC, RD},
-		},
-		RC: {
-			"parents": {RA},
-		},
-		RD: {
-			"parents": {RE},
-		},
-		RE: {
-			"parents": nil,
-		},
-	}
-
-	/*
-	   Suppose:
-
-	   The role-a is inheriting from role-b.
-	   The role-b is inheriting from role-c, role-d.
-	   The role-c is inheriting from role-a.
-	   The role-d is inheriting from role-e.
-	   The role-e is inheriting from role-b.
-
-	   There are two circles: 1) role-a, role-b, role-c; 2) role-b, role-d, role-e.
-	*/
-	circleCases2 = map[string]map[string][]string{
-		RA: {
-			"parents": {RB},
-		},
-		RB: {
-			"parents": {RC, RD},
-		},
-		RC: {
-			"parents": {RA},
-		},
-		RD: {
-			"parents": {RE},
-		},
-		RE: {
-			"parents": {RB},
-		},
-	}
+	pAll  = NewStdPermission("permission-all")
+	pNone = NewStdPermission("permission-none")
 )
 
-func TestInherCircle(t *testing.T) {
-	rbac := prepareCase(circleCases)
-
-	if err := InherCircle(rbac); err == nil {
-		t.Fatal("There should be a circle inheritance.")
-	} else {
-		t.Log(err)
-	}
+func TestPrepareCircle(t *testing.T) {
+	rbac = New()
+	assert(t, rA.AddPermission(pA))
+	assert(t, rB.AddPermission(pB))
+	assert(t, rC.AddPermission(pC))
+	assert(t, rA.AddPermission(pAll))
+	assert(t, rB.AddPermission(pAll))
+	assert(t, rC.AddPermission(pAll))
+	assert(t, rbac.Add(rA))
+	assert(t, rbac.Add(rB))
+	assert(t, rbac.Add(rC))
+	assert(t, rbac.SetParent("role-a", "role-b"))
+	assert(t, rbac.SetParent("role-b", "role-c"))
+	assert(t, rbac.SetParent("role-c", "role-a"))
 }
 
-func TestInherCircle2(t *testing.T) {
-	rbac := prepareCase(circleCases2)
-
+func TestInherCircle(t *testing.T) {
 	if err := InherCircle(rbac); err == nil {
 		t.Fatal("There should be a circle inheritance.")
 	} else {
@@ -86,63 +34,57 @@ func TestInherCircle2(t *testing.T) {
 }
 
 func TestInherNormal(t *testing.T) {
-	rbac := prepareCase(normalCases)
-
+	assert(t, rbac.RemoveParent("role-c", "role-a"))
 	if err := InherCircle(rbac); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestAllGranted(t *testing.T) {
-	rbac := prepareCase(normalCases)
-
-	// All roles have PD
-	roles := []string{RA, RB, RE}
-	if !AllGranted(rbac, roles, &StdPermission{PD}, nil) {
-		t.Errorf("All roles(%v) were expected having %s, but they weren't.", roles, PD)
+	// All roles have pAll
+	roles := []string{"role-a", "role-b", "role-c"}
+	if !AllGranted(rbac, roles, pAll, nil) {
+		t.Errorf("All roles(%v) were expected having %s, but they weren't.", roles, pAll)
 	}
 
-	roles = []string{RA, RB, RC}
-	if AllGranted(rbac, roles, &StdPermission{PD}, nil) {
-		t.Errorf("Not all roles(%v) were expected having %s, but they were.", roles, PD)
+	if AllGranted(rbac, roles, pA, nil) {
+		t.Errorf("Not all roles(%v) were expected having %s, but they were.", roles, pA)
 	}
 }
 
 func TestAnyGranted(t *testing.T) {
-	rbac := prepareCase(normalCases)
-
-	// All roles have PD
-	roles := []string{RA, RB, RE}
-	if !AnyGranted(rbac, roles, &StdPermission{PD}, nil) {
-		t.Errorf("One of roles(%v) was expected having %s, but it wasn't.", roles, PD)
+	// rA roles have pA
+	roles := []string{"role-a", "role-b", "role-c"}
+	if !AnyGranted(rbac, roles, pA, nil) {
+		t.Errorf("One of roles(%v) was expected having %s, but it wasn't.", roles, pA)
 	}
 
-	roles = []string{RB, RC, RE}
-	if AnyGranted(rbac, roles, &StdPermission{PA}, nil) {
-		t.Errorf("None of roles(%v) were expected having %s, but it was.", roles, PA)
+	if AnyGranted(rbac, roles, pNone, nil) {
+		t.Errorf("None of roles(%v) were expected having %s, but it was.", roles, pNone)
 	}
 
 }
 
 func BenchmarkInherCircle(b *testing.B) {
-	rbac := prepareCase(circleCases)
-
-	for i := 0; i < b.N; i++ {
-		InherCircle(rbac)
-	}
-}
-
-func BenchmarkInherCircle2(b *testing.B) {
-	rbac := prepareCase(circleCases2)
-
+	rbac = New()
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	rbac.SetParent("role-a", "role-b")
+	rbac.SetParent("role-b", "role-c")
+	rbac.SetParent("role-c", "role-a")
 	for i := 0; i < b.N; i++ {
 		InherCircle(rbac)
 	}
 }
 
 func BenchmarkInherNormal(b *testing.B) {
-	rbac := prepareCase(normalCases)
-
+	rbac = New()
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	rbac.SetParent("role-a", "role-b")
+	rbac.SetParent("role-b", "role-c")
 	for i := 0; i < b.N; i++ {
 		InherCircle(rbac)
 	}

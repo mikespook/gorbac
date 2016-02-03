@@ -10,31 +10,31 @@ func InherCircle(rbac *RBAC) error {
 	skipped := make(map[string]struct{})
 	var stack []string
 
-	for _, role := range rbac.roles {
-		if err := dfs(rbac, role, skipped, stack); err != nil {
+	for id, _ := range rbac.roles {
+		if err := dfs(rbac, id, skipped, stack); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func dfs(rbac *RBAC, role Role, skipped map[string]struct{}, stack []string) error {
-	if _, ok := skipped[role.Name()]; ok {
+func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) error {
+	if _, ok := skipped[id]; ok {
 		return nil
 	}
 	for _, item := range stack {
-		if item == role.Name() {
+		if item == id {
 			return fmt.Errorf("Found circle: %s", stack)
 		}
 	}
-	if len(role.Parents()) == 0 {
+	if len(rbac.parents[id]) == 0 {
 		stack = make([]string, 0)
-		skipped[role.Name()] = struct{}{}
+		skipped[id] = empty
 		return nil
 	}
-	stack = append(stack, role.Name())
-	for _, pname := range role.Parents() {
-		if err := dfs(rbac, rbac.roles[pname], skipped, stack); err != nil {
+	stack = append(stack, id)
+	for pid, _ := range rbac.parents[id] {
+		if err := dfs(rbac, pid, skipped, stack); err != nil {
 			return err
 		}
 	}

@@ -12,7 +12,7 @@ var (
 	rC = NewStdRole("role-c")
 	pC = NewStdPermission("permission-c")
 
-	rbac = New()
+	rbac *RBAC
 )
 
 func assert(t *testing.T, err error) {
@@ -22,6 +22,7 @@ func assert(t *testing.T, err error) {
 }
 
 func TestRbacPrepare(t *testing.T) {
+	rbac = New()
 	assert(t, rA.AddPermission(pA))
 	assert(t, rB.AddPermission(pB))
 	assert(t, rC.AddPermission(pC))
