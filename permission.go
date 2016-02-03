@@ -1,34 +1,24 @@
 package gorbac
 
 import (
-	"bytes"
-	"encoding/json"
 	"strings"
 )
+
+type NewPermissionFunc func(string) Permission
 
 type Permission interface {
 	Id() string
 	Match(Permission) bool
-	MarshalText() ([]byte, error)
-	UnmarshalText([]byte) error
 }
 
 type Permissions map[string]Permission
-
-func (ps Permissions) MarshalText() (text []byte, err error) {
-	return json.Marshal(ps)
-}
-
-func (ps Permissions) UnmarshalText(text []byte) error {
-	return json.Unmarshal(text, &ps)
-}
 
 // StdPermission only checks if the Ids are fully matching.
 type StdPermission struct {
 	IdStr string
 }
 
-func NewStdPermission(id string) *StdPermission {
+func NewStdPermission(id string) Permission {
 	return &StdPermission{id}
 }
 
@@ -40,25 +30,6 @@ func (p *StdPermission) Match(a Permission) bool {
 	return p.IdStr == a.Id()
 }
 
-func (p *StdPermission) MarshalText() (text []byte, err error) {
-	var buf bytes.Buffer
-	if _, err := buf.WriteRune('"'); err != nil {
-		return nil, err
-	}
-	if _, err := buf.WriteString(p.IdStr); err != nil {
-		return nil, err
-	}
-	if _, err := buf.WriteRune('"'); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (p *StdPermission) UnmarshalText(text []byte) error {
-	p.IdStr = string(bytes.Trim(text, "\""))
-	return nil
-}
-
 // LayerPermission firstly checks the Id of permission.
 // If the Id is matched, it can be consIdered having the permission.
 // Otherwise, it checks every layers of permission.
@@ -68,8 +39,8 @@ type LayerPermission struct {
 	Sep   string `json:"sep"`
 }
 
-func NewLayerPermission(id, sep string) *LayerPermission {
-	return &LayerPermission{id, sep}
+func NewLayerPermission(id string) Permission {
+	return &LayerPermission{id, ":"}
 }
 
 func (p *LayerPermission) Id() string {
@@ -96,15 +67,4 @@ func (p *LayerPermission) Match(a Permission) bool {
 		}
 	}
 	return true
-}
-
-func (p *LayerPermission) MarshalText() (text []byte, err error) {
-	return json.Marshal(p)
-}
-
-func (p *LayerPermission) UnmarshalText(text []byte) error {
-	if err := json.Unmarshal(text, &p); err != nil {
-		return err
-	}
-	return nil
 }

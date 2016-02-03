@@ -35,11 +35,11 @@ func TestStdPermission(t *testing.T) {
 }
 
 func TestLayerPermission(t *testing.T) {
-	profile1 := NewLayerPermission("profile", ":")
-	profile2 := NewLayerPermission("profile", ":")
-	admin := NewLayerPermission("admin", ":")
-	admindashboard := NewLayerPermission("admin:dashboard", ":")
-	adminpassword := NewLayerPermission("admin:password", ":")
+	profile1 := NewLayerPermission("profile")
+	profile2 := NewLayerPermission("profile")
+	admin := NewLayerPermission("admin")
+	admindashboard := NewLayerPermission("admin:dashboard")
+	adminpassword := NewLayerPermission("admin:password")
 
 	if !profile1.Match(profile1) {
 		t.Errorf("%s should have the permission", profile1.Id())
