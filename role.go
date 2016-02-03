@@ -23,7 +23,6 @@ func NewStdRole(id string) Role {
 	role := &StdRole{
 		IdStr:       id,
 		permissions: make(Permissions),
-		parents:     make(Roles),
 	}
 	return role
 }
@@ -34,7 +33,6 @@ type StdRole struct {
 	sync.RWMutex
 	IdStr       string `json:"id"`
 	permissions Permissions
-	parents     Roles
 }
 
 // Name returns the role's identity name.
@@ -56,11 +54,6 @@ func (role *StdRole) HasPermission(p Permission) bool {
 	defer role.RUnlock()
 	for _, rp := range role.permissions {
 		if rp.Match(p) {
-			return true
-		}
-	}
-	for _, parent := range role.parents {
-		if parent.HasPermission(p) {
 			return true
 		}
 	}

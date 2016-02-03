@@ -4,189 +4,82 @@ import (
 	"testing"
 )
 
-const (
-	// Roles
-	RA = "role-a"
-	RB = "role-b"
-	RC = "role-c"
-	RD = "role-d"
-	RE = "role-e"
-	// Permissions
-	PA = "permis-a"
-	PB = "permis-b"
-	PC = "permis-c"
-	PD = "permis-d"
-	PE = "permis-e"
-	//
-	NOTEXISTS = "not-exists"
-)
-
 var (
-	/*
-		Suppose:
+	rA = NewStdRole("role-a")
+	pA = NewStdPermission("permission-a")
+	rB = NewStdRole("role-b")
+	pB = NewStdPermission("permission-b")
+	rC = NewStdRole("role-c")
+	pC = NewStdPermission("permission-c")
 
-		The role-a is inheriting from role-b.
-		The role-b is inheriting from role-c, role-d.
-		The role-c is individual.
-		The role-d is individual.
-		The role-e is inheriting from role-d.
-		Every roles have thire own permissions.
-	*/
-	normalCases = map[string]map[string][]string{
-		RA: {
-			"permissions": {PA},
-			"parents":     {RB},
-		},
-		RB: {
-			"permissions": {PB},
-			"parents":     {RC, RD},
-		},
-		RC: {
-			"permissions": {PC},
-			"parents":     nil,
-		},
-		RD: {
-			"permissions": {PD},
-			"parents":     nil,
-		},
-		RE: {
-			"permissions": nil,
-			"parents":     {RD},
-		},
-	}
+	rbac = New()
 )
 
-func convPermissions(a []string) (ps []Permission) {
-	for _, v := range a {
-		ps = append(ps, &StdPermission{v})
-	}
-	return
-}
-
-func prepareCase(cases map[string]map[string][]string) *RBAC {
-	rbac := New()
-
-	for role, c := range cases {
-		rbac.Set(role, convPermissions(c["permissions"]), c["parents"])
-	}
-	return rbac
-}
-
-func _TestDumpRestore(t *testing.T) {
-	rbac := prepareCase(normalCases)
-	m := rbac.Dump()
-	a := len(m)
-	b := len(rbac.roles)
-	if a != b {
-		t.Errorf("`%d` roles, dumped `%d`", b, a)
-	}
-	t.Log(m)
-	rbac = Restore(m)
-	c := len(rbac.roles)
-	if a != c {
-		t.Errorf("`%d` roles, restored `%d`", a, c)
+func assert(t *testing.T, err error) {
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
-func TestRbacRoleA(t *testing.T) {
-	rbac := prepareCase(normalCases)
-	if !rbac.IsGranted(RA, &StdPermission{PA}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RA, &StdPermission{PA})
-	}
-	if !rbac.IsGranted(RA, &StdPermission{PB}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RA, &StdPermission{PB})
-	}
-	if !rbac.IsGranted(RA, &StdPermission{PC}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RA, &StdPermission{PC})
-	}
-	if !rbac.IsGranted(RA, &StdPermission{PD}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RA, &StdPermission{PD})
-	}
-	if rbac.IsGranted(RA, &StdPermission{PE}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RA, &StdPermission{PE})
-	}
+func TestRbacPrepare(t *testing.T) {
+	assert(t, rA.AddPermission(pA))
+	assert(t, rB.AddPermission(pB))
+	assert(t, rC.AddPermission(pC))
 }
 
-func TestRbacRoleB(t *testing.T) {
-	rbac := prepareCase(normalCases)
-	if rbac.IsGranted(RB, &StdPermission{PA}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RB, &StdPermission{PA})
+func TestRbacAdd(t *testing.T) {
+	assert(t, rbac.Add(rA))
+	if err := rbac.Add(rA); err != ErrRoleExist {
+		t.Error("A role can not be readded")
 	}
-	if !rbac.IsGranted(RB, &StdPermission{PB}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RB, &StdPermission{PB})
-	}
-	if !rbac.IsGranted(RB, &StdPermission{PC}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RB, &StdPermission{PC})
-	}
-	if !rbac.IsGranted(RB, &StdPermission{PD}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RB, &StdPermission{PD})
-	}
-	if rbac.IsGranted(RB, &StdPermission{PE}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RB, &StdPermission{PE})
-	}
+	assert(t, rbac.Add(rB))
+	assert(t, rbac.Add(rC))
 }
 
 func TestRbacRemove(t *testing.T) {
-	rbac := prepareCase(normalCases)
-	rbac.Remove(RD)
-	if rbac.IsGranted(RE, &StdPermission{PD}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RE, &StdPermission{PD})
+	assert(t, rbac.Remove("role-a"))
+	if _, ok := rbac.roles["role-a"]; ok {
+		t.Fatal("Role removing failed")
 	}
-	rbac.Get(RA).RevokePermission(&StdPermission{PA})
-	if rbac.IsGranted(RA, &StdPermission{PA}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RA, &StdPermission{PA})
-	}
-	rbac.Get(RB).RemoveParent(RC)
-	if rbac.IsGranted(RB, &StdPermission{PC}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RB, &StdPermission{PC})
-	}
-	if !rbac.IsGranted(RB, &StdPermission{PB}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RB, &StdPermission{PB})
-	}
-	if !rbac.IsGranted(RC, &StdPermission{PC}, nil) {
-		t.Errorf("`%s` should be granted `%s`.", RC, &StdPermission{PC})
+	if err := rbac.Remove("not-exist"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
 	}
 }
 
-func TestRbacNotExists(t *testing.T) {
-	rbac := prepareCase(normalCases)
-	if rbac.IsGranted(NOTEXISTS, &StdPermission{PA}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", NOTEXISTS, PA)
+func TestRbacParents(t *testing.T) {
+	assert(t, rbac.SetParent("role-c", "role-b"))
+	if _, ok := rbac.parents["role-c"]["role-b"]; !ok {
+		t.Fatal("Parent binding failed")
 	}
-	if rbac.IsGranted(RA, &StdPermission{NOTEXISTS}, nil) {
-		t.Errorf("`%s` should not be granted `%s`.", RA, NOTEXISTS)
+	assert(t, rbac.RemoveParent("role-c", "role-b"))
+	if _, ok := rbac.parents["role-c"]["role-b"]; ok {
+		t.Fatal("Parent unbinding failed")
 	}
-}
-
-func BenchmarkRbacIsGranted(b *testing.B) {
-	rbac := prepareCase(normalCases)
-	for i := 0; i < b.N; i++ {
-		rbac.IsGranted(RE, &StdPermission{PA}, nil)
+	if err := rbac.SetParent("role-a", "role-b"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
 	}
-}
-
-func BenchmarkRbacSet(b *testing.B) {
-	rbac := New()
-	for i := 0; i < b.N; i++ {
-		for role, testingcase := range normalCases {
-			rbac.Set(role, convPermissions(testingcase["permissions"]), testingcase["parents"])
-		}
+	if err := rbac.SetParent("role-c", "role-a"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
+	assert(t, rbac.SetParents("role-c", []string{"role-b"}))
+	if _, ok := rbac.parents["role-c"]["role-b"]; !ok {
+		t.Fatal("Parent binding failed")
 	}
 }
 
-func BenchmarkRbacAdd(b *testing.B) {
-	rbac := New()
-	for i := 0; i < b.N; i++ {
-		for role, testingcase := range normalCases {
-			rbac.Add(role, convPermissions(testingcase["permissions"]), testingcase["parents"])
-		}
+func TestRbacPermission(t *testing.T) {
+	if !rbac.IsGranted("role-c", pC, nil) {
+		t.Fatalf("role-c should have %s", pC)
 	}
-}
+	if rbac.IsGranted("role-c", pC, func(*RBAC, string, Permission) bool { return false }) {
+		t.Fatal("Assertion don't work")
+	}
+	if !rbac.IsGranted("role-c", pB, nil) {
+		t.Fatalf("role-c should have %s which inherits from role-b", pB)
+	}
 
-func BenchmarkDumpRestore(b *testing.B) {
-	rbac := prepareCase(normalCases)
-	for i := 0; i < b.N; i++ {
-		m := rbac.Dump()
-		rbac = Restore(m)
+	assert(t, rbac.RemoveParent("role-c", "role-b"))
+	if rbac.IsGranted("role-c", pB, nil) {
+		t.Fatalf("role-c should not have %s because of the unbinding with role-b", pB)
 	}
 }
