@@ -188,14 +188,18 @@ func (rbac *RBAC) isGranted(id string, p Permission, assert AssertionFunc) bool 
 	if assert != nil && !assert(rbac, id, p) {
 		return false
 	}
+	return rbac.recursionCheck(id, p)
+}
+
+func (rbac *RBAC) recursionCheck(id string, p Permission) bool {
 	if role, ok := rbac.roles[id]; ok {
 		if role.HasPermission(p) {
 			return true
 		}
 		if parents, ok := rbac.parents[id]; ok {
 			for pId, _ := range parents {
-				if pRole, ok := rbac.roles[pId]; ok {
-					if pRole.HasPermission(p) {
+				if _, ok := rbac.roles[pId]; ok {
+					if rbac.recursionCheck(pId, p) {
 						return true
 					}
 				}
