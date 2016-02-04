@@ -84,3 +84,29 @@ func TestRbacPermission(t *testing.T) {
 		t.Fatalf("role-c should not have %s because of the unbinding with role-b", pB)
 	}
 }
+
+func BenchmarkRbacGranted(b *testing.B) {
+	rbac = New()
+	rA.AddPermission(pA)
+	rB.AddPermission(pB)
+	rC.AddPermission(pC)
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	for i := 0; i < b.N; i++ {
+		rbac.IsGranted("role-a", pA, nil)
+	}
+}
+
+func BenchmarkRbacNotGranted(b *testing.B) {
+	rbac = New()
+	rA.AddPermission(pA)
+	rB.AddPermission(pB)
+	rC.AddPermission(pC)
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	for i := 0; i < b.N; i++ {
+		rbac.IsGranted("role-a", pB, nil)
+	}
+}
