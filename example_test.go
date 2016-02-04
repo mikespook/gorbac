@@ -6,23 +6,6 @@ import (
 	"github.com/mikespook/gorbac"
 )
 
-const (
-	// Roles
-	RA = "role-a"
-	RB = "role-b"
-	RC = "role-c"
-	RD = "role-d"
-	RE = "role-e"
-	// Permissions
-	PA = "permis-a"
-	PB = "permis-b"
-	PC = "permis-c"
-	PD = "permis-d"
-	PE = "permis-e"
-	//
-	NOTEXISTS = "not-exists"
-)
-
 /*
 	Suppose:
 
@@ -34,47 +17,47 @@ const (
 	Every roles have thire own permissions.
 */
 func ExampleRbac() {
-	normalCases := map[string]map[string][]string{
-		RA: {
-			"permissions": {PA},
-			"parents":     {RB},
-		},
-		RB: {
-			"permissions": {PB},
-			"parents":     {RC, RD},
-		},
-		RC: {
-			"permissions": {PC},
-			"parents":     nil,
-		},
-		RD: {
-			"permissions": {PD},
-			"parents":     nil,
-		},
-		RE: {
-			"permissions": nil,
-			"parents":     {RD},
-		},
-	}
 	rbac := gorbac.New()
+	rA := gorbac.NewStdRole("role-a")
+	rB := gorbac.NewStdRole("role-b")
+	rC := gorbac.NewStdRole("role-c")
+	rD := gorbac.NewStdRole("role-d")
+	rE := gorbac.NewStdRole("role-e")
 
-	for role, c := range normalCases {
-		rbac.Add(role, convPermissions(c["permissions"]), c["parents"])
-	}
+	pA := gorbac.NewStdPermission("permission-a")
+	pB := gorbac.NewStdPermission("permission-b")
+	pC := gorbac.NewStdPermission("permission-c")
+	pD := gorbac.NewStdPermission("permission-d")
+	pE := gorbac.NewStdPermission("permission-e")
 
-	if rbac.IsGranted(RA, gorbac.NewStdPermission(PA), nil) &&
-		rbac.IsGranted(RA, gorbac.NewStdPermission(PB), nil) &&
-		rbac.IsGranted(RA, gorbac.NewStdPermission(PC), nil) &&
-		rbac.IsGranted(RA, gorbac.NewStdPermission(PD), nil) {
+	rA.AddPermission(pA)
+	rB.AddPermission(pB)
+	rC.AddPermission(pC)
+	rD.AddPermission(pD)
+	rE.AddPermission(pE)
+
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	rbac.Add(rD)
+	rbac.Add(rE)
+	rbac.SetParent("role-a", "role-b")
+	rbac.SetParents("role-b", []string{"role-c", "role-d"})
+	rbac.SetParent("role-e", "role-d")
+
+	if rbac.IsGranted("role-a", pA, nil) &&
+		rbac.IsGranted("role-a", pB, nil) &&
+		rbac.IsGranted("role-a", pC, nil) &&
+		rbac.IsGranted("role-a", pD, nil) {
 		fmt.Println("The role-a has been granted permis-a, b, c and d.")
 	}
-	if rbac.IsGranted(RB, gorbac.NewStdPermission(PB), nil) &&
-		rbac.IsGranted(RB, gorbac.NewStdPermission(PC), nil) &&
-		rbac.IsGranted(RB, gorbac.NewStdPermission(PD), nil) {
+	if rbac.IsGranted("role-b", pB, nil) &&
+		rbac.IsGranted("role-b", pC, nil) &&
+		rbac.IsGranted("role-b", pD, nil) {
 		fmt.Println("The role-b has been granted permis-b, c and d.")
 	}
 	// When a circle inheratance ocurred,
-	rbac.Get(RC).AddParent(RA)
+	rbac.SetParent("role-c", "role-a")
 	// it could be detected as following code:
 	if err := gorbac.InherCircle(rbac); err != nil {
 		fmt.Println("A circle inheratance ocurred.")
@@ -83,11 +66,4 @@ func ExampleRbac() {
 	// The role-a has been granted permis-a, b, c and d.
 	// The role-b has been granted permis-b, c and d.
 	// A circle inheratance ocurred.
-}
-
-func convPermissions(a []string) (ps []gorbac.Permission) {
-	for _, v := range a {
-		ps = append(ps, gorbac.NewStdPermission(v))
-	}
-	return
 }
