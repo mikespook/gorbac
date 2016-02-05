@@ -37,13 +37,29 @@ func TestRbacAdd(t *testing.T) {
 	assert(t, rbac.Add(rC))
 }
 
-func TestRbacRemove(t *testing.T) {
+func TestRbacGetRemove(t *testing.T) {
+	assert(t, rbac.SetParent("role-c", "role-a"))
+	assert(t, rbac.SetParent("role-a", "role-b"))
+	if r, parents, err := rbac.Get("role-a"); err != nil {
+		t.Fatal(err)
+	} else if r.Id() != "role-a" {
+		t.Fatal("[role-a] does not match %s", r.Id())
+	} else if len(parents) != 1 {
+		t.Fatal("[role-a] should have one parent")
+	}
 	assert(t, rbac.Remove("role-a"))
 	if _, ok := rbac.roles["role-a"]; ok {
 		t.Fatal("Role removing failed")
 	}
 	if err := rbac.Remove("not-exist"); err != ErrRoleNotExist {
 		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
+	if r, parents, err := rbac.Get("role-a"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	} else if r != nil {
+		t.Fatal("The instance of role should be a nil")
+	} else if parents != nil {
+		t.Fatal("The slice of parents should be a nil")
 	}
 }
 
@@ -56,15 +72,42 @@ func TestRbacParents(t *testing.T) {
 	if _, ok := rbac.parents["role-c"]["role-b"]; ok {
 		t.Fatal("Parent unbinding failed")
 	}
+	if err := rbac.RemoveParent("role-a", "role-b"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
+	if err := rbac.RemoveParent("role-b", "role-a"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
 	if err := rbac.SetParent("role-a", "role-b"); err != ErrRoleNotExist {
 		t.Fatalf("%s needed", ErrRoleNotExist)
 	}
 	if err := rbac.SetParent("role-c", "role-a"); err != ErrRoleNotExist {
 		t.Fatalf("%s needed", ErrRoleNotExist)
 	}
+	if err := rbac.SetParents("role-a", []string{"role-b"}); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
+	if err := rbac.SetParents("role-c", []string{"role-a"}); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	}
 	assert(t, rbac.SetParents("role-c", []string{"role-b"}))
 	if _, ok := rbac.parents["role-c"]["role-b"]; !ok {
 		t.Fatal("Parent binding failed")
+	}
+	if parents, err := rbac.GetParents("role-a"); err != ErrRoleNotExist {
+		t.Fatalf("%s needed", ErrRoleNotExist)
+	} else if len(parents) != 0 {
+		t.Fatal("[role-a] should not have any parent")
+	}
+	if parents, err := rbac.GetParents("role-b"); err != nil {
+		t.Fatal(err)
+	} else if len(parents) != 0 {
+		t.Fatal("[role-b] should not have any parent")
+	}
+	if parents, err := rbac.GetParents("role-c"); err != nil {
+		t.Fatal(err)
+	} else if len(parents) != 1 {
+		t.Fatal("[role-c] should have one parent")
 	}
 }
 

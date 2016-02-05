@@ -13,6 +13,7 @@ __NOTE:__
 
 [![Build Status](https://travis-ci.org/mikespook/gorbac.png?branch=master)](https://travis-ci.org/mikespook/gorbac)
 [![GoDoc](https://godoc.org/github.com/mikespook/gorbac?status.png)](https://godoc.org/github.com/mikespook/gorbac)
+[![Coverage Status](https://coveralls.io/repos/github/mikespook/gorbac/badge.svg?branch=master)](https://coveralls.io/github/mikespook/gorbac?branch=master)
 
 goRBAC provides a lightweight role-based access control implementation
 in Golang.

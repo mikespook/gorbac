@@ -10,27 +10,27 @@ func TestStdPermission(t *testing.T) {
 	profile2 := NewStdPermission("profile")
 	admin := NewStdPermission("admin")
 	if !profile1.Match(profile2) {
-		t.Errorf("%s should have the permission", profile1.Id())
+		t.Fatalf("%s should have the permission", profile1.Id())
 	}
 	if !profile1.Match(profile1) {
-		t.Errorf("%s should have the permission", profile1.Id())
+		t.Fatalf("%s should have the permission", profile1.Id())
 	}
 	if profile1.Match(admin) {
-		t.Errorf("%s should not have the permission", profile1.Id())
+		t.Fatalf("%s should not have the permission", profile1.Id())
 	}
 	text, err := json.Marshal(profile1)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if string(text) == "\"profile\"" {
-		t.Errorf("[\"profile\"] expected, but %s got", text)
+		t.Fatalf("[\"profile\"] expected, but %s got", text)
 	}
 	var p StdPermission
 	if err := json.Unmarshal(text, &p); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if p.Id() != "profile" {
-		t.Errorf("[profile] expected, but %s got", p.Id())
+		t.Fatalf("[profile] expected, but %s got", p.Id())
 	}
 }
 
@@ -41,33 +41,37 @@ func TestLayerPermission(t *testing.T) {
 	admindashboard := NewLayerPermission("admin:dashboard")
 	adminpassword := NewLayerPermission("admin:password")
 
+	if profile1.Match(NewStdPermission("std-permission")) {
+		t.Fatal("Type assertion issue")
+	}
+
 	if !profile1.Match(profile1) {
-		t.Errorf("%s should have the permission", profile1.Id())
+		t.Fatalf("%s should have the permission", profile1.Id())
 	}
 	if !profile1.Match(profile2) {
-		t.Errorf("%s should have the permission", profile1.Id())
+		t.Fatalf("%s should have the permission", profile1.Id())
 	}
 	if profile1.Match(admin) {
-		t.Errorf("%s should not have the permission", profile1.Id())
+		t.Fatalf("%s should not have the permission", profile1.Id())
 	}
 	text, err := json.Marshal(admin)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var p LayerPermission
 	if err := json.Unmarshal(text, &p); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if p.Id() != "admin" {
-		t.Errorf("[admin] expected, but %s got", p.Id())
+		t.Fatalf("[admin] expected, but %s got", p.Id())
 	}
 	if !p.Match(admindashboard) {
-		t.Errorf("%s should have the permission", p.Id())
+		t.Fatalf("%s should have the permission", p.Id())
 	}
 	if admindashboard.Match(&p) {
-		t.Errorf("%s should not have the permission", admindashboard.Id())
+		t.Fatalf("%s should not have the permission", admindashboard.Id())
 	}
 	if adminpassword.Match(admindashboard) {
-		t.Errorf("%s should not have the permission", adminpassword.Id())
+		t.Fatalf("%s should not have the permission", adminpassword.Id())
 	}
 }
