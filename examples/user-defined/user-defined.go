@@ -25,7 +25,7 @@ func newMyRole(name string) gorbac.Role {
 		Label:       label,
 		Description: desc,
 	}
-	role.StdRole = gorbac.NewStdRole(name).(*gorbac.StdRole)
+	role.StdRole = gorbac.NewStdRole(name)
 	return role
 }
 
