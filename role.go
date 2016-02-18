@@ -37,8 +37,8 @@ func (role *StdRole) Id() string {
 	return role.IdStr
 }
 
-// AddPermission adds a permission to the role.
-func (role *StdRole) AddPermission(p Permission) error {
+// AssignPermission assigns a permission to the role.
+func (role *StdRole) AssignPermission(p Permission) error {
 	role.Lock()
 	defer role.Unlock()
 	role.permissions[p.Id()] = p

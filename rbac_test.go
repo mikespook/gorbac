@@ -23,9 +23,9 @@ func assert(t *testing.T, err error) {
 
 func TestRbacPrepare(t *testing.T) {
 	rbac = New()
-	assert(t, rA.AddPermission(pA))
-	assert(t, rB.AddPermission(pB))
-	assert(t, rC.AddPermission(pC))
+	assert(t, rA.AssignPermission(pA))
+	assert(t, rB.AssignPermission(pB))
+	assert(t, rC.AssignPermission(pC))
 }
 
 func TestRbacAdd(t *testing.T) {
@@ -130,9 +130,9 @@ func TestRbacPermission(t *testing.T) {
 
 func BenchmarkRbacGranted(b *testing.B) {
 	rbac = New()
-	rA.AddPermission(pA)
-	rB.AddPermission(pB)
-	rC.AddPermission(pC)
+	rA.AssignPermission(pA)
+	rB.AssignPermission(pB)
+	rC.AssignPermission(pC)
 	rbac.Add(rA)
 	rbac.Add(rB)
 	rbac.Add(rC)
@@ -143,9 +143,9 @@ func BenchmarkRbacGranted(b *testing.B) {
 
 func BenchmarkRbacNotGranted(b *testing.B) {
 	rbac = New()
-	rA.AddPermission(pA)
-	rB.AddPermission(pB)
-	rC.AddPermission(pC)
+	rA.AssignPermission(pA)
+	rB.AssignPermission(pB)
+	rC.AssignPermission(pC)
 	rbac.Add(rA)
 	rbac.Add(rB)
 	rbac.Add(rC)

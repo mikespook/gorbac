@@ -85,11 +85,11 @@ Get some new permissions:
 
 Add the permissions to roles:
 
-	rA.AddPermission(pA)
-	rB.AddPermission(pB)
-	rC.AddPermission(pC)
-	rD.AddPermission(pD)
-	rE.AddPermission(pE)
+	rA.AssignPermission(pA)
+	rB.AssignPermission(pB)
+	rC.AssignPermission(pC)
+	rD.AssignPermission(pD)
+	rE.AssignPermission(pE)
 
 Also, you can implement `gorbac.Role` and `gorbac.Permission` for your own data structure.
 
