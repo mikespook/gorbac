@@ -8,10 +8,7 @@ import (
 // You should implement this interface for your own role structures.
 type Role interface {
 	Id() string
-	AddPermission(Permission) error
 	HasPermission(Permission) bool
-	RevokePermission(Permission) error
-	Permissions() []Permission
 }
 
 type Roles map[string]Role
@@ -19,7 +16,7 @@ type NewRoleFunc func(string) Role
 
 // NewStdRole is the default role factory function.
 // It matches the declaration to RoleFactoryFunc.
-func NewStdRole(id string) Role {
+func NewStdRole(id string) *StdRole {
 	role := &StdRole{
 		IdStr:       id,
 		permissions: make(Permissions),
