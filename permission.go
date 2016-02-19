@@ -4,8 +4,6 @@ import (
 	"strings"
 )
 
-type NewPermissionFunc func(string) Permission
-
 type Permission interface {
 	Id() string
 	Match(Permission) bool
