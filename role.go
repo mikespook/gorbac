@@ -8,7 +8,7 @@ import (
 // You should implement this interface for your own role structures.
 type Role interface {
 	Id() string
-	HasPermission(Permission) bool
+	Permit(Permission) bool
 }
 
 type Roles map[string]Role
@@ -46,7 +46,7 @@ func (role *StdRole) AssignPermission(p Permission) error {
 }
 
 // HasPermission returns true if the role has specific permission.
-func (role *StdRole) HasPermission(p Permission) bool {
+func (role *StdRole) Permit(p Permission) bool {
 	role.RLock()
 	defer role.RUnlock()
 	for _, rp := range role.permissions {

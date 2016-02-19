@@ -12,7 +12,7 @@ func TestStdrA(t *testing.T) {
 	if err := rA.AssignPermission(NewStdPermission("permission-a")); err != nil {
 		t.Fatal(err)
 	}
-	if !rA.HasPermission(NewStdPermission("permission-a")) {
+	if !rA.Permit(NewStdPermission("permission-a")) {
 		t.Fatal("[permission-a] should permit to rA")
 	}
 	if len(rA.Permissions()) != 1 {
@@ -22,7 +22,7 @@ func TestStdrA(t *testing.T) {
 	if err := rA.RevokePermission(NewStdPermission("permission-a")); err != nil {
 		t.Fatal(err)
 	}
-	if rA.HasPermission(NewStdPermission("permission-a")) {
+	if rA.Permit(NewStdPermission("permission-a")) {
 		t.Fatal("[permission-a] should not permit to rA")
 	}
 	if len(rA.Permissions()) != 0 {
