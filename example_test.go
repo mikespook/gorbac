@@ -30,11 +30,11 @@ func ExampleRbac() {
 	pD := gorbac.NewStdPermission("permission-d")
 	pE := gorbac.NewStdPermission("permission-e")
 
-	rA.AssignPermission(pA)
-	rB.AssignPermission(pB)
-	rC.AssignPermission(pC)
-	rD.AssignPermission(pD)
-	rE.AssignPermission(pE)
+	rA.Assign(pA)
+	rB.Assign(pB)
+	rC.Assign(pC)
+	rD.Assign(pD)
+	rE.Assign(pE)
 
 	rbac.Add(rA)
 	rbac.Add(rB)

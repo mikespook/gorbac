@@ -11,12 +11,12 @@ var (
 
 func TestPrepareCircle(t *testing.T) {
 	rbac = New()
-	assert(t, rA.AssignPermission(pA))
-	assert(t, rB.AssignPermission(pB))
-	assert(t, rC.AssignPermission(pC))
-	assert(t, rA.AssignPermission(pAll))
-	assert(t, rB.AssignPermission(pAll))
-	assert(t, rC.AssignPermission(pAll))
+	assert(t, rA.Assign(pA))
+	assert(t, rB.Assign(pB))
+	assert(t, rC.Assign(pC))
+	assert(t, rA.Assign(pAll))
+	assert(t, rB.Assign(pAll))
+	assert(t, rC.Assign(pAll))
 	assert(t, rbac.Add(rA))
 	assert(t, rbac.Add(rB))
 	assert(t, rbac.Add(rC))

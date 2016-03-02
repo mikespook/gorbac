@@ -9,7 +9,7 @@ func TestStdrA(t *testing.T) {
 	if rA.Id() != "role-a" {
 		t.Fatalf("[a] expected, but %s got", rA.Id())
 	}
-	if err := rA.AssignPermission(NewStdPermission("permission-a")); err != nil {
+	if err := rA.Assign(NewStdPermission("permission-a")); err != nil {
 		t.Fatal(err)
 	}
 	if !rA.Permit(NewStdPermission("permission-a")) {
@@ -19,7 +19,7 @@ func TestStdrA(t *testing.T) {
 		t.Fatal("[a] should have one permission")
 	}
 
-	if err := rA.RevokePermission(NewStdPermission("permission-a")); err != nil {
+	if err := rA.Revoke(NewStdPermission("permission-a")); err != nil {
 		t.Fatal(err)
 	}
 	if rA.Permit(NewStdPermission("permission-a")) {

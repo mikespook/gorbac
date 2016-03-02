@@ -37,15 +37,15 @@ func (role *StdRole) Id() string {
 	return role.IdStr
 }
 
-// AssignPermission assigns a permission to the role.
-func (role *StdRole) AssignPermission(p Permission) error {
+// Assign a permission to the role.
+func (role *StdRole) Assign(p Permission) error {
 	role.Lock()
 	defer role.Unlock()
 	role.permissions[p.Id()] = p
 	return nil
 }
 
-// HasPermission returns true if the role has specific permission.
+// Permit returns true if the role has specific permission.
 func (role *StdRole) Permit(p Permission) bool {
 	role.RLock()
 	defer role.RUnlock()
@@ -57,8 +57,8 @@ func (role *StdRole) Permit(p Permission) bool {
 	return false
 }
 
-// RevokePermission remove the specific permission.
-func (role *StdRole) RevokePermission(p Permission) error {
+// Revoke the specific permission.
+func (role *StdRole) Revoke(p Permission) error {
 	role.Lock()
 	defer role.Unlock()
 	delete(role.permissions, p.Id())

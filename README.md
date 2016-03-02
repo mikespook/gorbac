@@ -85,11 +85,11 @@ Get some new permissions:
 
 Add the permissions to roles:
 
-	rA.AssignPermission(pA)
-	rB.AssignPermission(pB)
-	rC.AssignPermission(pC)
-	rD.AssignPermission(pD)
-	rE.AssignPermission(pE)
+	rA.Assign(pA)
+	rB.Assign(pB)
+	rC.Assign(pC)
+	rD.Assign(pD)
+	rE.Assign(pE)
 
 Also, you can implement `gorbac.Role` and `gorbac.Permission` for your own data structure.
 
@@ -133,6 +133,14 @@ E.g.:
 	if err := gorbac.InherCircle(rbac); err != nil {
 		fmt.Println("A circle inheratance ocurred.")
 	}
+
+Patches
+=======
+
+__2016-03-03__
+
+    gofmt -w -r 'AssignPermission -> Assign' .
+	gofmt -w -r 'RevokePermission -> Revoke' .
 
 
 Authors
