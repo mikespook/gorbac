@@ -42,8 +42,8 @@ func TestRbacGetRemove(t *testing.T) {
 	assert(t, rbac.SetParent("role-a", "role-b"))
 	if r, parents, err := rbac.Get("role-a"); err != nil {
 		t.Fatal(err)
-	} else if r.Id() != "role-a" {
-		t.Fatalf("[role-a] does not match %s", r.Id())
+	} else if r.ID() != "role-a" {
+		t.Fatalf("[role-a] does not match %s", r.ID())
 	} else if len(parents) != 1 {
 		t.Fatal("[role-a] should have one parent")
 	}

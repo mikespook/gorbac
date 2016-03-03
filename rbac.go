@@ -22,9 +22,11 @@ import (
 )
 
 var (
+	// ErrRoleNotExist occurred if a role cann't be found
 	ErrRoleNotExist = errors.New("Role does not exist")
-	ErrRoleExist    = errors.New("Role has already existed")
-	empty           = struct{}{}
+	// ErrRoleExist occurred if a role shouldn't be found
+	ErrRoleExist = errors.New("Role has already existed")
+	empty        = struct{}{}
 )
 
 // AssertionFunc supplies more fine-grained permission controls.
@@ -85,7 +87,7 @@ func (rbac *RBAC) GetParents(id string) ([]string, error) {
 	if !ok {
 		return nil, nil
 	}
-	parents := make([]string, 0)
+	var parents []string
 	for parent := range ids {
 		parents = append(parents, parent)
 	}
@@ -132,10 +134,10 @@ func (rbac *RBAC) RemoveParent(id string, parent string) error {
 func (rbac *RBAC) Add(r Role) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
-	if _, ok := rbac.roles[r.Id()]; ok {
+	if _, ok := rbac.roles[r.ID()]; ok {
 		return ErrRoleExist
 	}
-	rbac.roles[r.Id()] = r
+	rbac.roles[r.ID()] = r
 	return nil
 }
 
@@ -170,7 +172,7 @@ func (rbac *RBAC) Get(id string) (Role, []string, error) {
 	if !ok {
 		return nil, nil, ErrRoleNotExist
 	}
-	parents := make([]string, 0)
+	var parents []string
 	for parent := range rbac.parents[id] {
 		parents = append(parents, parent)
 	}
@@ -197,9 +199,9 @@ func (rbac *RBAC) recursionCheck(id string, p Permission) bool {
 			return true
 		}
 		if parents, ok := rbac.parents[id]; ok {
-			for pId := range parents {
-				if _, ok := rbac.roles[pId]; ok {
-					if rbac.recursionCheck(pId, p) {
+			for pID := range parents {
+				if _, ok := rbac.roles[pID]; ok {
+					if rbac.recursionCheck(pID, p) {
 						return true
 					}
 				}

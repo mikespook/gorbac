@@ -69,6 +69,6 @@ func main() {
 	}
 	if myRole, ok := role.(*myRole); ok {
 		fmt.Printf("Name:\t%s\nLabel:\t%s\nDesc:\t%s\nParents:\t%s\n",
-			myRole.Id(), myRole.Label, myRole.Description, parents)
+			myRole.ID(), myRole.Label, myRole.Description, parents)
 	}
 }

@@ -6,8 +6,8 @@ import (
 
 func TestStdrA(t *testing.T) {
 	rA := NewStdRole("role-a")
-	if rA.Id() != "role-a" {
-		t.Fatalf("[a] expected, but %s got", rA.Id())
+	if rA.ID() != "role-a" {
+		t.Fatalf("[a] expected, but %s got", rA.ID())
 	}
 	if err := rA.Assign(NewStdPermission("permission-a")); err != nil {
 		t.Fatal(err)
