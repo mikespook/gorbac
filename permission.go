@@ -4,11 +4,13 @@ import (
 	"strings"
 )
 
+// Permission exports `Id` and `Match`
 type Permission interface {
 	Id() string
 	Match(Permission) bool
 }
 
+// Permissions
 type Permissions map[string]Permission
 
 // StdPermission only checks if the Ids are fully matching.
@@ -16,14 +18,17 @@ type StdPermission struct {
 	IdStr string
 }
 
+// NewStdPermission returns a Permission instance with `id`
 func NewStdPermission(id string) Permission {
 	return &StdPermission{id}
 }
 
+// Id
 func (p *StdPermission) Id() string {
 	return p.IdStr
 }
 
+// Match another permission
 func (p *StdPermission) Match(a Permission) bool {
 	return p.IdStr == a.Id()
 }
@@ -37,14 +42,17 @@ type LayerPermission struct {
 	Sep   string `json:"sep"`
 }
 
+// NewLayerPermission returns an instance of layered permission with `id`
 func NewLayerPermission(id string) Permission {
 	return &LayerPermission{id, ":"}
 }
 
+// Id
 func (p *LayerPermission) Id() string {
 	return p.IdStr
 }
 
+// Match another permission
 func (p *LayerPermission) Match(a Permission) bool {
 	if p.IdStr == a.Id() {
 		return true
