@@ -10,7 +10,7 @@ func InherCircle(rbac *RBAC) error {
 	skipped := make(map[string]struct{})
 	var stack []string
 
-	for id, _ := range rbac.roles {
+	for id := range rbac.roles {
 		if err := dfs(rbac, id, skipped, stack); err != nil {
 			return err
 		}
@@ -33,7 +33,7 @@ func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) err
 		return nil
 	}
 	stack = append(stack, id)
-	for pid, _ := range rbac.parents[id] {
+	for pid := range rbac.parents[id] {
 		if err := dfs(rbac, pid, skipped, stack); err != nil {
 			return err
 		}

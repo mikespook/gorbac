@@ -56,14 +56,14 @@ func ExampleRbac() {
 		rbac.IsGranted("role-b", pD, nil) {
 		fmt.Println("The role-b has been granted permis-b, c and d.")
 	}
-	// When a circle inheratance ocurred,
+	// When a circle inheratance occurred,
 	rbac.SetParent("role-c", "role-a")
 	// it could be detected as following code:
 	if err := gorbac.InherCircle(rbac); err != nil {
-		fmt.Println("A circle inheratance ocurred.")
+		fmt.Println("A circle inheratance occurred.")
 	}
 	// Output:
 	// The role-a has been granted permis-a, b, c and d.
 	// The role-b has been granted permis-b, c and d.
-	// A circle inheratance ocurred.
+	// A circle inheratance occurred.
 }

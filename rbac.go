@@ -86,7 +86,7 @@ func (rbac *RBAC) GetParents(id string) ([]string, error) {
 		return nil, nil
 	}
 	parents := make([]string, 0)
-	for parent, _ := range ids {
+	for parent := range ids {
 		parents = append(parents, parent)
 	}
 	return parents, nil
@@ -152,7 +152,7 @@ func (rbac *RBAC) Remove(id string) error {
 			delete(rbac.parents, rid)
 			continue
 		}
-		for parent, _ := range parents {
+		for parent := range parents {
 			if parent == id {
 				delete(rbac.parents[rid], id)
 				break
@@ -171,7 +171,7 @@ func (rbac *RBAC) Get(id string) (Role, []string, error) {
 		return nil, nil, ErrRoleNotExist
 	}
 	parents := make([]string, 0)
-	for parent, _ := range rbac.parents[id] {
+	for parent := range rbac.parents[id] {
 		parents = append(parents, parent)
 	}
 	return r, parents, nil
@@ -197,7 +197,7 @@ func (rbac *RBAC) recursionCheck(id string, p Permission) bool {
 			return true
 		}
 		if parents, ok := rbac.parents[id]; ok {
-			for pId, _ := range parents {
+			for pId := range parents {
 				if _, ok := rbac.roles[pId]; ok {
 					if rbac.recursionCheck(pId, p) {
 						return true
