@@ -37,7 +37,7 @@ Install
 
 Install the package:
 
-> $ go get github.com/mikespook/gorbac
+> $ go get gopkg.in/mikespook/gorbac.v2
 	
 Usage
 =====
