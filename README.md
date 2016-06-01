@@ -1,16 +1,6 @@
 goRBAC 
 ======
 
-__NOTE:__
-
-0. Current master comes from the redesign branch (to be the v2 once stabled).
-
-1. The original master branch has been moved to the branch [v1.dev](https://github.com/mikespook/gorbac/tree/v1.dev) with stable release tag [v1.0](https://github.com/mikespook/gorbac/tree/v1.0);
-
-2. Currently, the API may change without notice and documentation;
-
-3. Use at your own __RISK__.
-
 [![Build Status](https://travis-ci.org/mikespook/gorbac.png?branch=master)](https://travis-ci.org/mikespook/gorbac)
 [![GoDoc](https://godoc.org/github.com/mikespook/gorbac?status.png)](https://godoc.org/github.com/mikespook/gorbac)
 [![Coverage Status](https://coveralls.io/repos/github/mikespook/gorbac/badge.svg?branch=master)](https://coveralls.io/github/mikespook/gorbac?branch=master)
@@ -35,9 +25,11 @@ Version
 
 Currently, goRBAC has two versions:
 
-[Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) with the original design is stable.
+[Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only mantain to fix bugs.
 
-While [the master branch](https://github.com/mikespook/gorbac) which intended to be Version 2 is under developing.
+[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the newly design which will continually mantain with a stable API.
+
+While [the master branch](https://github.com/mikespook/gorbac) will be under developing with new API and can be changed without notice.
 
 
 Install
