@@ -3,19 +3,19 @@ package gorbac
 import "fmt"
 
 // InherCircle returns an error when detecting any circle inheritance.
-func InherCircle(rbac *RBAC) error {
+func InherCircle(rbac *RBAC) (err error) {
 	rbac.mutex.Lock()
-	defer rbac.mutex.Unlock()
 
 	skipped := make(map[string]struct{})
 	var stack []string
 
 	for id := range rbac.roles {
-		if err := dfs(rbac, id, skipped, stack); err != nil {
-			return err
+		if err = dfs(rbac, id, skipped, stack); err != nil {
+			break
 		}
 	}
-	return nil
+	rbac.mutex.Unlock()
+	return err
 }
 
 func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) error {
@@ -43,26 +43,28 @@ func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) err
 
 // AnyGranted checks if any role has the permission.
 func AnyGranted(rbac *RBAC, roles []string, permission Permission,
-	assert AssertionFunc) bool {
+	assert AssertionFunc) (rslt bool) {
 	rbac.mutex.Lock()
-	defer rbac.mutex.Unlock()
 	for _, role := range roles {
 		if rbac.isGranted(role, permission, assert) {
-			return true
+			rslt = true
+			break
 		}
 	}
-	return false
+	rbac.mutex.Unlock()
+	return rslt
 }
 
 // AllGranted checks if all roles have the permission.
 func AllGranted(rbac *RBAC, roles []string, permission Permission,
-	assert AssertionFunc) bool {
+	assert AssertionFunc) (rslt bool) {
 	rbac.mutex.Lock()
-	defer rbac.mutex.Unlock()
 	for _, role := range roles {
 		if !rbac.isGranted(role, permission, assert) {
-			return false
+			rslt = true
+			break
 		}
 	}
-	return true
+	rbac.mutex.Unlock()
+	return !rslt
 }

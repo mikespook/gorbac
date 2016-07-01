@@ -12,3 +12,9 @@ coverage: fmt
 test: fmt 
 	go vet ./...
 	go test ./...
+
+pprof:
+	go test -c
+	./gorbac.test -test.cpuprofile cpu.out -test.bench .
+	go tool pprof gorbac.test cpu.out
+	rm cpu.out gorbac.test
