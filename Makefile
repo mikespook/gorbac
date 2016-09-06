@@ -15,6 +15,14 @@ test: fmt
 
 pprof:
 	go test -c
-	./gorbac.test -test.cpuprofile cpu.out -test.bench .
-	go tool pprof gorbac.test cpu.out
-	rm cpu.out gorbac.test
+	./gorbac.test -test.cpuprofile cpu.prof -test.bench .
+	go tool pprof gorbac.test cpu.prof
+	rm cpu.prof gorbac.test
+
+flamegraph:
+	go test -c
+	./gorbac.test -test.cpuprofile cpu.prof -test.bench .
+	go-torch ./gorbac.test cpu.prof
+	xdg-open torch.svg
+	sleep 5
+	rm cpu.prof gorbac.test torch.svg
