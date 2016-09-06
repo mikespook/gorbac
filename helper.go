@@ -6,7 +6,7 @@ import "fmt"
 func InherCircle(rbac *RBAC) (err error) {
 	rbac.mutex.Lock()
 
-	skipped := make(map[string]struct{})
+	skipped := make(map[string]struct{}, len(rbac.roles))
 	var stack []string
 
 	for id := range rbac.roles {
@@ -18,17 +18,21 @@ func InherCircle(rbac *RBAC) (err error) {
 	return err
 }
 
+var (
+	ErrFoundCircle = fmt.Errorf("Found circle")
+)
+
 func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) error {
 	if _, ok := skipped[id]; ok {
 		return nil
 	}
 	for _, item := range stack {
 		if item == id {
-			return fmt.Errorf("Found circle: %s", stack)
+			return ErrFoundCircle
 		}
 	}
 	if len(rbac.parents[id]) == 0 {
-		stack = make([]string, 0)
+		stack = nil
 		skipped[id] = empty
 		return nil
 	}
