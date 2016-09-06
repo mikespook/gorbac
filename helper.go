@@ -22,6 +22,7 @@ var (
 	ErrFoundCircle = fmt.Errorf("Found circle")
 )
 
+// https://en.wikipedia.org/wiki/Depth-first_search
 func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) error {
 	if _, ok := skipped[id]; ok {
 		return nil
