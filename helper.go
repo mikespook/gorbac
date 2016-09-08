@@ -32,13 +32,14 @@ func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) err
 			return ErrFoundCircle
 		}
 	}
-	if len(rbac.parents[id]) == 0 {
+	parents := rbac.parents[id]
+	if len(parents) == 0 {
 		stack = nil
 		skipped[id] = empty
 		return nil
 	}
 	stack = append(stack, id)
-	for pid := range rbac.parents[id] {
+	for pid := range parents {
 		if err := dfs(rbac, pid, skipped, stack); err != nil {
 			return err
 		}
