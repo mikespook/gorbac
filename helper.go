@@ -2,6 +2,26 @@ package gorbac
 
 import "fmt"
 
+// RoleHandler is a function defined by user to handle role
+type WalkHandler func(Role, []string) error
+
+// Walk passes each Role to PersistenceHandler
+func Walk(rbac *RBAC, h WalkHandler) (err error) {
+	if h == nil {
+		return
+	}
+	for id := range rbac.roles {
+		r, parents, err := rbac.Get(id)
+		if err != nil {
+			return err
+		}
+		if err := h(r, parents); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 // InherCircle returns an error when detecting any circle inheritance.
 func InherCircle(rbac *RBAC) (err error) {
 	rbac.mutex.Lock()

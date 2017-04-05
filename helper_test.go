@@ -1,6 +1,7 @@
 package gorbac
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -63,6 +64,31 @@ func TestAnyGranted(t *testing.T) {
 		t.Errorf("None of roles(%v) were expected having %s, but it was.", roles, pNone)
 	}
 
+}
+
+func TestWalk(t *testing.T) {
+	if err := Walk(rbac, nil); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+	h := func(r Role, parents []string) error {
+		t.Logf("Role: %v", r.ID())
+		permissions := make([]string, 0)
+		for _, p := range r.(*StdRole).Permissions() {
+			permissions = append(permissions, p.ID())
+		}
+		t.Logf("Permission: %v", permissions)
+		t.Logf("Parents: %v", parents)
+		return nil
+	}
+	if err := Walk(rbac, h); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+	he := func(r Role, parents []string) error {
+		return errors.New("Expected error")
+	}
+	if err := Walk(rbac, he); err == nil {
+		t.Errorf("Expected error, got nil")
+	}
 }
 
 func BenchmarkInherCircle(b *testing.B) {
