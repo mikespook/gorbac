@@ -34,19 +34,17 @@ type AssertionFunc func(*RBAC, string, Permission) bool
 
 // RBAC object, in most cases it should be used as a singleton.
 type RBAC struct {
-	mutex       sync.RWMutex
-	roles       Roles
-	permissions Permissions
-	parents     map[string]map[string]struct{}
+	mutex   sync.RWMutex
+	roles   Roles
+	parents map[string]map[string]struct{}
 }
 
 // New returns a RBAC structure.
 // The default role structure will be used.
 func New() *RBAC {
 	return &RBAC{
-		roles:       make(Roles),
-		permissions: make(Permissions),
-		parents:     make(map[string]map[string]struct{}),
+		roles:   make(Roles),
+		parents: make(map[string]map[string]struct{}),
 	}
 }
 
