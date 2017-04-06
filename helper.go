@@ -2,18 +2,21 @@ package gorbac
 
 import "fmt"
 
-// RoleHandler is a function defined by user to handle role
+// WalkHandler is a function defined by user to handle role
 type WalkHandler func(Role, []string) error
 
-// Walk passes each Role to PersistenceHandler
+// Walk passes each Role to WalkHandler
 func Walk(rbac *RBAC, h WalkHandler) (err error) {
 	if h == nil {
 		return
 	}
+	rbac.mutex.Lock()
+	defer rbac.mutex.Unlock()
 	for id := range rbac.roles {
-		r, parents, err := rbac.Get(id)
-		if err != nil {
-			return err
+		var parents []string
+		r := rbac.roles[id]
+		for parent := range rbac.parents[id] {
+			parents = append(parents, parent)
 		}
 		if err := h(r, parents); err != nil {
 			return err
