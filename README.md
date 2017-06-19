@@ -42,7 +42,7 @@ Install the package:
 Usage
 =====
 
-Despite you can adjust the RBAC instance anytime and it's absolutely safe, the library is designed for using with two phases:
+Although you can adjust the RBAC instance anytime and it's absolutely safe, the library is designed for using with two phases:
 
 1. Preparing
 
@@ -123,13 +123,13 @@ E.g.:
 
 	rbac.SetParent("role-c", "role-a")
 	if err := gorbac.InherCircle(rbac); err != nil {
-		fmt.Println("A circle inheratance ocurred.")
+		fmt.Println("A circle inheratance occurred.")
 	}
 
 Persistence
 -----------
 
-The mose asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
+The most asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
 
 Patches
 =======
