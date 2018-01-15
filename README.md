@@ -126,6 +126,11 @@ E.g.:
 		fmt.Println("A circle inheratance ocurred.")
 	}
 
+Persistence
+-----------
+
+The mose asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
+
 Patches
 =======
 

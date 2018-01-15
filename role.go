@@ -41,38 +41,39 @@ func (role *StdRole) ID() string {
 // Assign a permission to the role.
 func (role *StdRole) Assign(p Permission) error {
 	role.Lock()
-	defer role.Unlock()
 	role.permissions[p.ID()] = p
+	role.Unlock()
 	return nil
 }
 
 // Permit returns true if the role has specific permission.
-func (role *StdRole) Permit(p Permission) bool {
+func (role *StdRole) Permit(p Permission) (rslt bool) {
 	role.RLock()
-	defer role.RUnlock()
 	for _, rp := range role.permissions {
 		if rp.Match(p) {
-			return true
+			rslt = true
+			break
 		}
 	}
-	return false
+	role.RUnlock()
+	return
 }
 
 // Revoke the specific permission.
 func (role *StdRole) Revoke(p Permission) error {
 	role.Lock()
-	defer role.Unlock()
 	delete(role.permissions, p.ID())
+	role.Unlock()
 	return nil
 }
 
 // Permissions returns all permissions into a slice.
 func (role *StdRole) Permissions() []Permission {
 	role.RLock()
-	defer role.RUnlock()
 	result := make([]Permission, 0, len(role.permissions))
 	for _, p := range role.permissions {
 		result = append(result, p)
 	}
+	role.RUnlock()
 	return result
 }
