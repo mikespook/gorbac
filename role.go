@@ -48,6 +48,10 @@ func (role *StdRole) Assign(p Permission) error {
 
 // Permit returns true if the role has specific permission.
 func (role *StdRole) Permit(p Permission) (rslt bool) {
+	if p == nil {
+		return false
+	}
+
 	role.RLock()
 	for _, rp := range role.permissions {
 		if rp.Match(p) {

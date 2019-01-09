@@ -126,6 +126,10 @@ func TestRbacPermission(t *testing.T) {
 	if rbac.IsGranted("role-c", pB, nil) {
 		t.Fatalf("role-c should not have %s because of the unbinding with role-b", pB)
 	}
+
+	if rbac.IsGranted("role-a", nil, nil) {
+		t.Fatal("role-a should not have nil permission")
+	}
 }
 
 func BenchmarkRbacGranted(b *testing.B) {
