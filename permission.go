@@ -34,7 +34,7 @@ func (p *StdPermission) Match(a Permission) bool {
 }
 
 // LayerPermission firstly checks the Id of permission.
-// If the Id is matched, it can be consIdered having the permission.
+// If the Id is matched, it can be considered having the permission.
 // Otherwise, it checks every layers of permission.
 // A role which has an upper layer granted, will be granted sub-layers permissions.
 type LayerPermission struct {
