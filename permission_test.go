@@ -75,3 +75,23 @@ func TestLayerPermission(t *testing.T) {
 		t.Fatalf("%s should not have the permission", adminpassword.ID())
 	}
 }
+
+func TestStdPermissionPointerReceiver(t *testing.T) {
+	stdP1 := StdPermission{"testing"}
+	stdP1Pointer := NewStdPermission("testing")
+
+	if !stdP1.Match(stdP1Pointer) {
+		t.Fatalf("stdP1 %s should match stdP1Pointer %s", stdP1.ID(), stdP1Pointer.ID())
+	}
+
+	stdP2 := StdPermission{"not-match"}
+	stdP2Pointer := NewStdPermission("not-match")
+
+	if stdP1.Match(stdP2) {
+		t.Fatalf("stdP1 %s should not match stdP2 %s", stdP1.ID(), stdP2.ID())
+	}
+
+	if stdP1.Match(stdP2Pointer) {
+		t.Fatalf("stdP1 %s should not match stdP2Pointer %s", stdP1.ID(), stdP2Pointer.ID())
+	}
+}
