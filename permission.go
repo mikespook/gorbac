@@ -24,12 +24,12 @@ func NewStdPermission(id string) Permission {
 }
 
 // ID returns the identity of permission
-func (p *StdPermission) ID() string {
+func (p StdPermission) ID() string {
 	return p.IDStr
 }
 
 // Match another permission
-func (p *StdPermission) Match(a Permission) bool {
+func (p StdPermission) Match(a Permission) bool {
 	return p.IDStr == a.ID()
 }
 
