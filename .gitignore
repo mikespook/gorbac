@@ -20,3 +20,9 @@ _cgo_export.*
 _testmain.go
 
 *.exe
+
+# Proejct specific
+examples/user-defined/user-defined
+examples/persistence/persistence
+examples/persistence/new-inher.json
+examples/persistence/new-roles.json
