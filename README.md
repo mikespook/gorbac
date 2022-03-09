@@ -25,11 +25,11 @@ Version
 
 Currently, goRBAC has two versions:
 
-[Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only mantain to fix bugs.
+[Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only be mantained to fix bugs.
 
-[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the newly design which will continually mantain with a stable API.
+[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the new design which will be continually mantained with a stable API.
 
-While [the master branch](https://github.com/mikespook/gorbac) will be under developing with new API and can be changed without notice.
+[The master branch](https://github.com/mikespook/gorbac) will be under development with a new API and can be changed without notice.
 
 
 Install
@@ -42,7 +42,7 @@ Install the package:
 Usage
 =====
 
-Despite you can adjust the RBAC instance anytime and it's absolutely safe, the library is designed for using with two phases:
+Although you can adjust the RBAC instance anytime and it's absolutely safe, the library is designed for use with two phases:
 
 1. Preparing
 
@@ -85,7 +85,7 @@ Add the permissions to roles:
 
 Also, you can implement `gorbac.Role` and `gorbac.Permission` for your own data structure.
 
-After initailization, add the roles to the RBAC instance:
+After initialization, add the roles to the RBAC instance:
 
 	rbac.Add(rA)
 	rbac.Add(rB)
@@ -117,19 +117,19 @@ And there are some built-in util-functions:
 [AnyGranted](https://godoc.org/github.com/mikespook/gorbac#AnyGranted), 
 [AllGranted](https://godoc.org/github.com/mikespook/gorbac#AllGranted). 
 Please [open an issue](https://github.com/mikespook/gorbac/issues/new) 
-for the new built-in requriement.
+for the new built-in requirement.
 
 E.g.:
 
 	rbac.SetParent("role-c", "role-a")
 	if err := gorbac.InherCircle(rbac); err != nil {
-		fmt.Println("A circle inheratance ocurred.")
+		fmt.Println("A circle inheratance occurred.")
 	}
 
 Persistence
 -----------
 
-The mose asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
+The most asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
 
 Patches
 =======
