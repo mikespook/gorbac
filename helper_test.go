@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	pAll  = NewStdPermission("permission-all")
-	pNone = NewStdPermission("permission-none")
+	pAll  = NewPermission("permission-all")
+	pNone = NewPermission("permission-none")
 )
 
 func TestPrepareCircle(t *testing.T) {
-	rbac = New()
+	rbac = New[string]()
 	assert(t, rA.Assign(pA))
 	assert(t, rB.Assign(pB))
 	assert(t, rC.Assign(pC))
@@ -70,11 +70,11 @@ func TestWalk(t *testing.T) {
 	if err := Walk(rbac, nil); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
-	h := func(r Role, parents []string) error {
-		t.Logf("Role: %v", r.ID())
+	h := func(r Role[string], parents []string) error {
+		t.Logf("Role: %v", r.ID)
 		permissions := make([]string, 0)
-		for _, p := range r.(*StdRole).Permissions() {
-			permissions = append(permissions, p.ID())
+		for _, p := range r.Permissions() {
+			permissions = append(permissions, p.ID)
 		}
 		t.Logf("Permission: %v", permissions)
 		t.Logf("Parents: %v", parents)
@@ -83,7 +83,7 @@ func TestWalk(t *testing.T) {
 	if err := Walk(rbac, h); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
-	he := func(r Role, parents []string) error {
+	he := func(r Role[string], parents []string) error {
 		return errors.New("Expected error")
 	}
 	if err := Walk(rbac, he); err == nil {
@@ -92,7 +92,7 @@ func TestWalk(t *testing.T) {
 }
 
 func BenchmarkInherCircle(b *testing.B) {
-	rbac = New()
+	rbac = New[string]()
 	rbac.Add(rA)
 	rbac.Add(rB)
 	rbac.Add(rC)
@@ -105,7 +105,7 @@ func BenchmarkInherCircle(b *testing.B) {
 }
 
 func BenchmarkInherNormal(b *testing.B) {
-	rbac = New()
+	rbac = New[string]()
 	rbac.Add(rA)
 	rbac.Add(rB)
 	rbac.Add(rC)

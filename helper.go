@@ -3,17 +3,17 @@ package gorbac
 import "fmt"
 
 // WalkHandler is a function defined by user to handle role
-type WalkHandler func(Role, []string) error
+type WalkHandler[K comparable] func(Role[K], []K) error
 
 // Walk passes each Role to WalkHandler
-func Walk(rbac *RBAC, h WalkHandler) (err error) {
+func Walk[K comparable](rbac *RBAC[K], h WalkHandler[K]) (err error) {
 	if h == nil {
 		return
 	}
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	for id := range rbac.roles {
-		var parents []string
+		var parents []K
 		r := rbac.roles[id]
 		for parent := range rbac.parents[id] {
 			parents = append(parents, parent)
@@ -26,11 +26,11 @@ func Walk(rbac *RBAC, h WalkHandler) (err error) {
 }
 
 // InherCircle returns an error when detecting any circle inheritance.
-func InherCircle(rbac *RBAC) (err error) {
+func InherCircle[K comparable](rbac *RBAC[K]) (err error) {
 	rbac.mutex.Lock()
 
-	skipped := make(map[string]struct{}, len(rbac.roles))
-	var stack []string
+	skipped := make(map[K]struct{}, len(rbac.roles))
+	var stack []K
 
 	for id := range rbac.roles {
 		if err = dfs(rbac, id, skipped, stack); err != nil {
@@ -46,7 +46,7 @@ var (
 )
 
 // https://en.wikipedia.org/wiki/Depth-first_search
-func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) error {
+func dfs[K comparable](rbac *RBAC[K], id K, skipped map[K]struct{}, stack []K) error {
 	if _, ok := skipped[id]; ok {
 		return nil
 	}
@@ -71,29 +71,30 @@ func dfs(rbac *RBAC, id string, skipped map[string]struct{}, stack []string) err
 }
 
 // AnyGranted checks if any role has the permission.
-func AnyGranted(rbac *RBAC, roles []string, permission Permission,
-	assert AssertionFunc) (rslt bool) {
+func AnyGranted[K comparable](rbac *RBAC[K], roles []K, permission Permission[K],
+	assert AssertionFunc[K]) (ok bool) {
 	rbac.mutex.Lock()
 	for _, role := range roles {
 		if rbac.isGranted(role, permission, assert) {
-			rslt = true
+			ok = true
 			break
 		}
 	}
 	rbac.mutex.Unlock()
-	return rslt
+	return
 }
 
 // AllGranted checks if all roles have the permission.
-func AllGranted(rbac *RBAC, roles []string, permission Permission,
-	assert AssertionFunc) (rslt bool) {
+func AllGranted[K comparable](rbac *RBAC[K], roles []K, permission Permission[K],
+	assert AssertionFunc[K]) (ok bool) {
+	ok = true
 	rbac.mutex.Lock()
 	for _, role := range roles {
 		if !rbac.isGranted(role, permission, assert) {
-			rslt = true
+			ok = false
 			break
 		}
 	}
 	rbac.mutex.Unlock()
-	return !rslt
+	return
 }

@@ -17,18 +17,18 @@ import (
 	Every roles have thire own permissions.
 */
 func ExampleRbac() {
-	rbac := gorbac.New()
-	rA := gorbac.NewStdRole("role-a")
-	rB := gorbac.NewStdRole("role-b")
-	rC := gorbac.NewStdRole("role-c")
-	rD := gorbac.NewStdRole("role-d")
-	rE := gorbac.NewStdRole("role-e")
+	rbac := gorbac.New[string]()
+	rA := gorbac.NewRole("role-a")
+	rB := gorbac.NewRole("role-b")
+	rC := gorbac.NewRole("role-c")
+	rD := gorbac.NewRole("role-d")
+	rE := gorbac.NewRole("role-e")
 
-	pA := gorbac.NewStdPermission("permission-a")
-	pB := gorbac.NewStdPermission("permission-b")
-	pC := gorbac.NewStdPermission("permission-c")
-	pD := gorbac.NewStdPermission("permission-d")
-	pE := gorbac.NewStdPermission("permission-e")
+	pA := gorbac.NewPermission("permission-a")
+	pB := gorbac.NewPermission("permission-b")
+	pC := gorbac.NewPermission("permission-c")
+	pD := gorbac.NewPermission("permission-d")
+	pE := gorbac.NewPermission("permission-e")
 
 	rA.Assign(pA)
 	rB.Assign(pB)
