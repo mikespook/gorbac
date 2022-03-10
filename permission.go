@@ -1,74 +1,50 @@
 package gorbac
 
-import (
-	"strings"
-)
-
 // Permission exports `Id` and `Match`
-type Permission interface {
-	ID() string
-	Match(Permission) bool
-}
-
-// Permissions is a map
-type Permissions map[string]Permission
-
-// StdPermission only checks if the Ids are fully matching.
-type StdPermission struct {
-	IDStr string
-}
-
-// NewStdPermission returns a Permission instance with `id`
-func NewStdPermission(id string) Permission {
-	return &StdPermission{id}
-}
-
-// ID returns the identity of permission
-func (p StdPermission) ID() string {
-	return p.IDStr
+type Permission[K comparable] struct {
+	ID K
 }
 
 // Match another permission
-func (p StdPermission) Match(a Permission) bool {
-	return p.IDStr == a.ID()
+func (p Permission[comparable]) Match(a Permission[comparable]) bool {
+	return p.ID == a.ID
 }
 
-// LayerPermission firstly checks the Id of permission.
-// If the Id is matched, it can be consIdered having the permission.
-// Otherwise, it checks every layers of permission.
-// A role which has an upper layer granted, will be granted sub-layers permissions.
-type LayerPermission struct {
-	IDStr string `json:"id"`
-	Sep   string `json:"sep"`
+func NewPermission[K comparable](id K) Permission[K] {
+	return Permission[K]{id}
+}
+
+
+// Permissions is a map
+type Permissions[K comparable] map[K]Permission[K]
+
+// LayerPermission uses []K as a layered ID.
+// Lower layers have higher privileges.
+type LayerPermission[K comparable] struct {
+	ID []K `json:"id"`
 }
 
 // NewLayerPermission returns an instance of layered permission with `id`
-func NewLayerPermission(id string) Permission {
-	return &LayerPermission{id, ":"}
-}
-
-// ID returns the identity of permission
-func (p *LayerPermission) ID() string {
-	return p.IDStr
+func NewLayerPermission[K comparable](id []K) LayerPermission[K] {
+	return LayerPermission[K]{id}
 }
 
 // Match another permission
-func (p *LayerPermission) Match(a Permission) bool {
-	if p.IDStr == a.ID() {
-		return true
-	}
-	q, ok := a.(*LayerPermission)
-	if !ok {
+func (p *LayerPermission[comparable]) Match(parent LayerPermission[comparable]) bool {
+	// The layer number of parent has to be bigger than p,
+	// otherwise, parent is sub-permission of p.
+	//
+	// e.g. a = [1 ,2]; b = [1, 2, 3];
+	// It means b is a sub permission of a.
+	// i.e. b.Match(a) is true, a.Match(b) is false.
+	if len(p.ID) < len(parent.ID) {
 		return false
 	}
-	players := strings.Split(p.IDStr, p.Sep)
-	qlayers := strings.Split(q.IDStr, q.Sep)
-	// layer counts of q should be less than that of p
-	if len(players) > len(qlayers) {
-		return false
-	}
-	for k, pv := range players {
-		if pv != qlayers[k] {
+	// p longer than or equal to parent
+	for k, pv := range parent.ID {
+		// In complex case, e.g. a = [1, 2, 3]; b = [1, 3, 4];
+		// The permission is miss-matched on the second layer.
+		if pv != p.ID[k] {
 			return false
 		}
 	}
