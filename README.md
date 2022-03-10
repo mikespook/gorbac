@@ -23,11 +23,13 @@ Thus, RBAC has the following model:
 Version
 =======
 
-Currently, goRBAC has two versions:
+Currently, goRBAC has two released versions
 
 [Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only be mantained to fix bugs.
 
 [Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the new design which will be continually mantained with a stable API.
+
+and the developing branch is
 
 [The master branch](https://github.com/mikespook/gorbac) will be under development with a new API and can be changed without notice.
 
