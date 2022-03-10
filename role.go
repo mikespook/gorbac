@@ -4,58 +4,46 @@ import (
 	"sync"
 )
 
-// Role is an interface.
-// You should implement this interface for your own role structures.
-type Role interface {
-	ID() string
-	Permit(Permission) bool
-}
-
 // Roles is a map
-type Roles map[string]Role
+type Roles[K comparable] map[K]Role[K]
 
 // NewStdRole is the default role factory function.
 // It matches the declaration to RoleFactoryFunc.
-func NewStdRole(id string) *StdRole {
-	role := &StdRole{
-		IDStr:       id,
-		permissions: make(Permissions),
+func NewRole[K comparable](id K) Role[K] {
+	return Role[K]{
+		ID:       id,
+		permissions: make(Permissions[K]),
 	}
-	return role
 }
 
 // StdRole is the default role implement.
 // You can combine this struct into your own Role implement.
-type StdRole struct {
+type Role[K comparable] struct {
 	sync.RWMutex
 	// IDStr is the identity of role
-	IDStr       string `json:"id"`
-	permissions Permissions
-}
-
-// ID returns the role's identity name.
-func (role *StdRole) ID() string {
-	return role.IDStr
+	ID       K `json:"id"`
+	permissions Permissions[K]
 }
 
 // Assign a permission to the role.
-func (role *StdRole) Assign(p Permission) error {
+func (role *Role[K]) Assign(p Permission[K]) error {
 	role.Lock()
-	role.permissions[p.ID()] = p
+	role.permissions[p.ID] = p
 	role.Unlock()
 	return nil
 }
 
 // Permit returns true if the role has specific permission.
-func (role *StdRole) Permit(p Permission) (rslt bool) {
-	if p == nil {
+func (role *Role[K]) Permit(p Permission[K]) (ok bool) {
+	var zero Permission[K]
+	if p == zero {
 		return false
 	}
 
 	role.RLock()
 	for _, rp := range role.permissions {
 		if rp.Match(p) {
-			rslt = true
+			ok = true
 			break
 		}
 	}
@@ -64,17 +52,17 @@ func (role *StdRole) Permit(p Permission) (rslt bool) {
 }
 
 // Revoke the specific permission.
-func (role *StdRole) Revoke(p Permission) error {
+func (role *Role[K]) Revoke(p Permission[K]) error {
 	role.Lock()
-	delete(role.permissions, p.ID())
+	delete(role.permissions, p.ID)
 	role.Unlock()
 	return nil
 }
 
 // Permissions returns all permissions into a slice.
-func (role *StdRole) Permissions() []Permission {
+func (role *Role[K]) Permissions() []Permission[K] {
 	role.RLock()
-	result := make([]Permission, 0, len(role.permissions))
+	result := make([]Permission[K], 0, len(role.permissions))
 	for _, p := range role.permissions {
 		result = append(result, p)
 	}
