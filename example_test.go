@@ -24,11 +24,11 @@ func ExampleRbac() {
 	rD := gorbac.NewRole("role-d")
 	rE := gorbac.NewRole("role-e")
 
-	pA := gorbac.NewPermission("permission-a")
-	pB := gorbac.NewPermission("permission-b")
-	pC := gorbac.NewPermission("permission-c")
-	pD := gorbac.NewPermission("permission-d")
-	pE := gorbac.NewPermission("permission-e")
+	pA := gorbac.NewBasicPermission("permission-a")
+	pB := gorbac.NewBasicPermission("permission-b")
+	pC := gorbac.NewBasicPermission("permission-c")
+	pD := gorbac.NewBasicPermission("permission-d")
+	pE := gorbac.NewBasicPermission("permission-e")
 
 	rA.Assign(pA)
 	rB.Assign(pB)

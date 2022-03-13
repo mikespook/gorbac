@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	pAll  = NewPermission("permission-all")
-	pNone = NewPermission("permission-none")
+	pAll  = NewBasicPermission("permission-all")
+	pNone = NewBasicPermission("permission-none")
 )
 
 func TestPrepareCircle(t *testing.T) {
@@ -74,7 +74,7 @@ func TestWalk(t *testing.T) {
 		t.Logf("Role: %v", r.ID)
 		permissions := make([]string, 0)
 		for _, p := range r.Permissions() {
-			permissions = append(permissions, p.ID)
+			permissions = append(permissions, p.ID())
 		}
 		t.Logf("Permission: %v", permissions)
 		t.Logf("Parents: %v", parents)
