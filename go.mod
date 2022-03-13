@@ -1,3 +1,3 @@
-module github.com/mikespook/gorbac/v2
+module github.com/mikespook/gorbac/v3
 
-go 1.16
+go 1.18

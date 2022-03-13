@@ -30,28 +30,28 @@ var (
 )
 
 // AssertionFunc supplies more fine-grained permission controls.
-type AssertionFunc func(*RBAC, string, Permission) bool
+type AssertionFunc[T comparable] func(*RBAC[T], T, Permission[T]) bool
 
 // RBAC object, in most cases it should be used as a singleton.
-type RBAC struct {
+type RBAC[T comparable] struct {
 	mutex   sync.RWMutex
-	roles   Roles
-	parents map[string]map[string]struct{}
+	roles   Roles[T]
+	parents map[T]map[T]struct{}
 }
 
 // New returns a RBAC structure.
 // The default role structure will be used.
-func New() *RBAC {
-	return &RBAC{
-		roles:   make(Roles),
-		parents: make(map[string]map[string]struct{}),
+func New[T comparable]() *RBAC[T] {
+	return &RBAC[T]{
+		roles:   make(Roles[T]),
+		parents: make(map[T]map[T]struct{}),
 	}
 }
 
 // SetParents bind `parents` to the role `id`.
 // If the role or any of parents is not existing,
 // an error will be returned.
-func (rbac *RBAC) SetParents(id string, parents []string) error {
+func (rbac *RBAC[T]) SetParents(id T, parents []T) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	if _, ok := rbac.roles[id]; !ok {
@@ -63,7 +63,7 @@ func (rbac *RBAC) SetParents(id string, parents []string) error {
 		}
 	}
 	if _, ok := rbac.parents[id]; !ok {
-		rbac.parents[id] = make(map[string]struct{})
+		rbac.parents[id] = make(map[T]struct{})
 	}
 	for _, parent := range parents {
 		rbac.parents[id][parent] = empty
@@ -75,7 +75,7 @@ func (rbac *RBAC) SetParents(id string, parents []string) error {
 // If the role is not existing, an error will be returned.
 // Or the role doesn't have any parents,
 // a nil slice will be returned.
-func (rbac *RBAC) GetParents(id string) ([]string, error) {
+func (rbac *RBAC[T]) GetParents(id T) ([]T, error) {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	if _, ok := rbac.roles[id]; !ok {
@@ -85,7 +85,7 @@ func (rbac *RBAC) GetParents(id string) ([]string, error) {
 	if !ok {
 		return nil, nil
 	}
-	var parents []string
+	var parents []T
 	for parent := range ids {
 		parents = append(parents, parent)
 	}
@@ -95,7 +95,7 @@ func (rbac *RBAC) GetParents(id string) ([]string, error) {
 // SetParent bind the `parent` to the role `id`.
 // If the role or the parent is not existing,
 // an error will be returned.
-func (rbac *RBAC) SetParent(id string, parent string) error {
+func (rbac *RBAC[T]) SetParent(id T, parent T) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	if _, ok := rbac.roles[id]; !ok {
@@ -105,7 +105,7 @@ func (rbac *RBAC) SetParent(id string, parent string) error {
 		return ErrRoleNotExist
 	}
 	if _, ok := rbac.parents[id]; !ok {
-		rbac.parents[id] = make(map[string]struct{})
+		rbac.parents[id] = make(map[T]struct{})
 	}
 	var empty struct{}
 	rbac.parents[id][parent] = empty
@@ -115,7 +115,7 @@ func (rbac *RBAC) SetParent(id string, parent string) error {
 // RemoveParent unbind the `parent` with the role `id`.
 // If the role or the parent is not existing,
 // an error will be returned.
-func (rbac *RBAC) RemoveParent(id string, parent string) error {
+func (rbac *RBAC[T]) RemoveParent(id T, parent T) error {
 	rbac.mutex.Lock()
 	defer rbac.mutex.Unlock()
 	if _, ok := rbac.roles[id]; !ok {
@@ -129,10 +129,10 @@ func (rbac *RBAC) RemoveParent(id string, parent string) error {
 }
 
 // Add a role `r`.
-func (rbac *RBAC) Add(r Role) (err error) {
+func (rbac *RBAC[T]) Add(r Role[T]) (err error) {
 	rbac.mutex.Lock()
-	if _, ok := rbac.roles[r.ID()]; !ok {
-		rbac.roles[r.ID()] = r
+	if _, ok := rbac.roles[r.ID]; !ok {
+		rbac.roles[r.ID] = r
 	} else {
 		err = ErrRoleExist
 	}
@@ -141,7 +141,7 @@ func (rbac *RBAC) Add(r Role) (err error) {
 }
 
 // Remove the role by `id`.
-func (rbac *RBAC) Remove(id string) (err error) {
+func (rbac *RBAC[T]) Remove(id T) (err error) {
 	rbac.mutex.Lock()
 	if _, ok := rbac.roles[id]; ok {
 		delete(rbac.roles, id)
@@ -165,7 +165,7 @@ func (rbac *RBAC) Remove(id string) (err error) {
 }
 
 // Get the role by `id` and a slice of its parents id.
-func (rbac *RBAC) Get(id string) (r Role, parents []string, err error) {
+func (rbac *RBAC[T]) Get(id T) (r Role[T], parents []T, err error) {
 	rbac.mutex.RLock()
 	var ok bool
 	if r, ok = rbac.roles[id]; ok {
@@ -180,21 +180,23 @@ func (rbac *RBAC) Get(id string) (r Role, parents []string, err error) {
 }
 
 // IsGranted tests if the role `id` has Permission `p` with the condition `assert`.
-func (rbac *RBAC) IsGranted(id string, p Permission, assert AssertionFunc) (rslt bool) {
+func (rbac *RBAC[T]) IsGranted(id T, p Permission[T],
+	assert AssertionFunc[T]) (ok bool) {
 	rbac.mutex.RLock()
-	rslt = rbac.isGranted(id, p, assert)
+	ok = rbac.isGranted(id, p, assert)
 	rbac.mutex.RUnlock()
 	return
 }
 
-func (rbac *RBAC) isGranted(id string, p Permission, assert AssertionFunc) bool {
+func (rbac *RBAC[T]) isGranted(id T, p Permission[T],
+	assert AssertionFunc[T]) bool {
 	if assert != nil && !assert(rbac, id, p) {
 		return false
 	}
 	return rbac.recursionCheck(id, p)
 }
 
-func (rbac *RBAC) recursionCheck(id string, p Permission) bool {
+func (rbac *RBAC[T]) recursionCheck(id T, p Permission[T]) bool {
 	if role, ok := rbac.roles[id]; ok {
 		if role.Permit(p) {
 			return true

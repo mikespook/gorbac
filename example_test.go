@@ -16,19 +16,19 @@ import (
 	The role-e is inheriting from role-d.
 	Every roles have thire own permissions.
 */
-func ExampleRbac() {
-	rbac := gorbac.New()
-	rA := gorbac.NewStdRole("role-a")
-	rB := gorbac.NewStdRole("role-b")
-	rC := gorbac.NewStdRole("role-c")
-	rD := gorbac.NewStdRole("role-d")
-	rE := gorbac.NewStdRole("role-e")
+func ExampleRbacStringID() {
+	rbac := gorbac.New[string]()
+	rA := gorbac.NewRole("role-a")
+	rB := gorbac.NewRole("role-b")
+	rC := gorbac.NewRole("role-c")
+	rD := gorbac.NewRole("role-d")
+	rE := gorbac.NewRole("role-e")
 
-	pA := gorbac.NewStdPermission("permission-a")
-	pB := gorbac.NewStdPermission("permission-b")
-	pC := gorbac.NewStdPermission("permission-c")
-	pD := gorbac.NewStdPermission("permission-d")
-	pE := gorbac.NewStdPermission("permission-e")
+	pA := gorbac.NewPermission("permission-a")
+	pB := gorbac.NewPermission("permission-b")
+	pC := gorbac.NewPermission("permission-c")
+	pD := gorbac.NewPermission("permission-d")
+	pE := gorbac.NewPermission("permission-e")
 
 	rA.Assign(pA)
 	rB.Assign(pB)
@@ -58,6 +58,58 @@ func ExampleRbac() {
 	}
 	// When a circle inheratance occurred,
 	rbac.SetParent("role-c", "role-a")
+	// it could be detected as following code:
+	if err := gorbac.InherCircle(rbac); err != nil {
+		fmt.Println("A circle inheratance occurred.")
+	}
+	// Output:
+	// The role-a has been granted permis-a, b, c and d.
+	// The role-b has been granted permis-b, c and d.
+	// A circle inheratance occurred.
+}
+
+func ExampleRbacNumberID() {
+	rbac := gorbac.New[int]()
+	rA := gorbac.NewRole(1)
+	rB := gorbac.NewRole(2)
+	rC := gorbac.NewRole(3)
+	rD := gorbac.NewRole(4)
+	rE := gorbac.NewRole(5)
+
+	pA := gorbac.NewPermission(1)
+	pB := gorbac.NewPermission(2)
+	pC := gorbac.NewPermission(3)
+	pD := gorbac.NewPermission(4)
+	pE := gorbac.NewPermission(5)
+
+	rA.Assign(pA)
+	rB.Assign(pB)
+	rC.Assign(pC)
+	rD.Assign(pD)
+	rE.Assign(pE)
+
+	rbac.Add(rA)
+	rbac.Add(rB)
+	rbac.Add(rC)
+	rbac.Add(rD)
+	rbac.Add(rE)
+	rbac.SetParent(1, 2)
+	rbac.SetParents(2, []int{3, 4})
+	rbac.SetParent(5, 4)
+
+	if rbac.IsGranted(1, pA, nil) &&
+		rbac.IsGranted(1, pB, nil) &&
+		rbac.IsGranted(1, pC, nil) &&
+		rbac.IsGranted(1, pD, nil) {
+		fmt.Println("The role-a has been granted permis-a, b, c and d.")
+	}
+	if rbac.IsGranted(2, pB, nil) &&
+		rbac.IsGranted(2, pC, nil) &&
+		rbac.IsGranted(2, pD, nil) {
+		fmt.Println("The role-b has been granted permis-b, c and d.")
+	}
+	// When a circle inheratance occurred,
+	rbac.SetParent(3, 1)
 	// it could be detected as following code:
 	if err := gorbac.InherCircle(rbac); err != nil {
 		fmt.Println("A circle inheratance occurred.")

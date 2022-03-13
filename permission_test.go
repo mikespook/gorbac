@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestStdPermission(t *testing.T) {
-	profile1 := NewStdPermission("profile")
-	profile2 := NewStdPermission("profile")
-	admin := NewStdPermission("admin")
+func TestBasicPermission(t *testing.T) {
+	profile1 := NewPermission("profile")
+	profile2 := NewPermission("profile")
+	admin := NewPermission("admin")
 	if !profile1.Match(profile2) {
 		t.Fatalf("%s should have the permission", profile1.ID())
 	}
@@ -23,75 +23,33 @@ func TestStdPermission(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(text) == "\"profile\"" {
-		t.Fatalf("[\"profile\"] expected, but %s got", text)
+		t.Fatalf("[\"profile\"] expected, but [%s] got", text)
 	}
-	var p StdPermission
+	var p StdPermission[string]
 	if err := json.Unmarshal(text, &p); err != nil {
 		t.Fatal(err)
 	}
 	if p.ID() != "profile" {
-		t.Fatalf("[profile] expected, but %s got", p.ID())
+		t.Fatalf("[profile] expected, but [%s] got", p.ID())
 	}
 }
 
-func TestLayerPermission(t *testing.T) {
-	profile1 := NewLayerPermission("profile")
-	profile2 := NewLayerPermission("profile")
-	admin := NewLayerPermission("admin")
-	admindashboard := NewLayerPermission("admin:dashboard")
-	adminpassword := NewLayerPermission("admin:password")
+func TestBasicPermissionPointerReceiver(t *testing.T) {
+	P1 := StdPermission[string]{"testing"}
+	P1Pointer := NewPermission("testing")
 
-	if profile1.Match(NewStdPermission("std-permission")) {
-		t.Fatal("Type assertion issue")
+	if !P1.Match(P1Pointer) {
+		t.Fatalf("P1 %s should match P1Pointer %s", P1.ID(), P1Pointer.ID())
 	}
 
-	if !profile1.Match(profile1) {
-		t.Fatalf("%s should have the permission", profile1.ID())
-	}
-	if !profile1.Match(profile2) {
-		t.Fatalf("%s should have the permission", profile1.ID())
-	}
-	if profile1.Match(admin) {
-		t.Fatalf("%s should not have the permission", profile1.ID())
-	}
-	text, err := json.Marshal(admin)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var p LayerPermission
-	if err := json.Unmarshal(text, &p); err != nil {
-		t.Fatal(err)
-	}
-	if p.ID() != "admin" {
-		t.Fatalf("[admin] expected, but %s got", p.ID())
-	}
-	if !p.Match(admindashboard) {
-		t.Fatalf("%s should have the permission", p.ID())
-	}
-	if admindashboard.Match(&p) {
-		t.Fatalf("%s should not have the permission", admindashboard.ID())
-	}
-	if adminpassword.Match(admindashboard) {
-		t.Fatalf("%s should not have the permission", adminpassword.ID())
-	}
-}
+	P2 := StdPermission[string]{"not-match"}
+	P2Pointer := NewPermission("not-match")
 
-func TestStdPermissionPointerReceiver(t *testing.T) {
-	stdP1 := StdPermission{"testing"}
-	stdP1Pointer := NewStdPermission("testing")
-
-	if !stdP1.Match(stdP1Pointer) {
-		t.Fatalf("stdP1 %s should match stdP1Pointer %s", stdP1.ID(), stdP1Pointer.ID())
+	if P1.Match(P2) {
+		t.Fatalf("P1 %s should not match P2 %s", P1.ID(), P2.ID())
 	}
 
-	stdP2 := StdPermission{"not-match"}
-	stdP2Pointer := NewStdPermission("not-match")
-
-	if stdP1.Match(stdP2) {
-		t.Fatalf("stdP1 %s should not match stdP2 %s", stdP1.ID(), stdP2.ID())
-	}
-
-	if stdP1.Match(stdP2Pointer) {
-		t.Fatalf("stdP1 %s should not match stdP2Pointer %s", stdP1.ID(), stdP2Pointer.ID())
+	if P1.Match(P2Pointer) {
+		t.Fatalf("P1 %s should not match P2Pointer %s", P1.ID(), P2Pointer.ID())
 	}
 }
