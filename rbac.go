@@ -181,7 +181,7 @@ func (rbac *RBAC[T]) Get(id T) (r Role[T], parents []T, err error) {
 
 // IsGranted tests if the role `id` has Permission `p` with the condition `assert`.
 func (rbac *RBAC[T]) IsGranted(id T, p Permission[T],
-assert AssertionFunc[T]) (ok bool) {
+	assert AssertionFunc[T]) (ok bool) {
 	rbac.mutex.RLock()
 	ok = rbac.isGranted(id, p, assert)
 	rbac.mutex.RUnlock()

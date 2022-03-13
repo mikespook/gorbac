@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	pAll  = NewBasicPermission("permission-all")
-	pNone = NewBasicPermission("permission-none")
+	pAll  = NewPermission("permission-all")
+	pNone = NewPermission("permission-none")
 )
 
 func TestPrepareCircle(t *testing.T) {

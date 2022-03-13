@@ -6,15 +6,15 @@ import (
 
 var (
 	rA = NewRole("role-a")
-	pA = NewBasicPermission("permission-a")
+	pA = NewPermission("permission-a")
 	rB = NewRole("role-b")
-	pB = NewBasicPermission("permission-b")
+	pB = NewPermission("permission-b")
 	rC = NewRole("role-c")
-	pC = NewBasicPermission("permission-c")
+	pC = NewPermission("permission-c")
 
 	rbac *RBAC[string]
 
-	roleZero Role[string]
+	roleZero       Role[string]
 	permissionZero Permission[string]
 )
 

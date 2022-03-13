@@ -11,7 +11,7 @@ type Roles[T comparable] map[T]Role[T]
 // It matches the declaration to RoleFactoryFunc.
 func NewRole[T comparable](id T) Role[T] {
 	return Role[T]{
-		ID:       id,
+		ID:          id,
 		permissions: make(Permissions[T]),
 	}
 }
@@ -22,7 +22,7 @@ func NewRole[T comparable](id T) Role[T] {
 type Role[T comparable] struct {
 	sync.RWMutex
 	// ID is the serialisable identity of role
-	ID       T `json:"id"`
+	ID          T `json:"id"`
 	permissions Permissions[T]
 }
 

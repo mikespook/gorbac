@@ -1,6 +1,6 @@
 package gorbac
 
-import(
+import (
 	"strings"
 )
 

@@ -27,11 +27,11 @@ Currently, goRBAC has two released versions
 
 [Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only be mantained to fix bugs.
 
-[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the new design which will be continually mantained with a stable API.
+[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the new design which will only be mantained to fix bugs.
 
 and the developing branch is
 
-[The master branch](https://github.com/mikespook/gorbac) will be under development with a new API and can be changed without notice.
+[The master branch](https://github.com/mikespook/gorbac) will be under development with generic and can be changed without notice.
 
 
 Install
@@ -132,14 +132,6 @@ Persistence
 -----------
 
 The most asked question is how to persist the goRBAC instance. Please check the post [HOW TO PERSIST GORBAC INSTANCE](https://mikespook.com/2017/04/how-to-persist-gorbac-instance/) for the details.
-
-Patches
-=======
-
-__2016-03-03__
-
-    gofmt -w -r 'AssignPermission -> Assign' .
-	gofmt -w -r 'RevokePermission -> Revoke' .
 
 
 Authors
