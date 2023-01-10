@@ -3,7 +3,7 @@ package gorbac_test
 import (
 	"fmt"
 
-	"github.com/mikespook/gorbac"
+	"github.com/mikespook/gorbac/v3"
 )
 
 /*
