@@ -14,7 +14,7 @@ import (
 	The role-c is individual.
 	The role-d is individual.
 	The role-e is inheriting from role-d.
-	Every roles have thire own permissions.
+	Every roles have their own permissions.
 */
 func ExampleRbacStringID() {
 	rbac := gorbac.New[string]()
