@@ -4,13 +4,26 @@ package main
 import (
 	"fmt"
 
-	"github.com/mikespook/gorbac"
+	"github.com/mikespook/gorbac/v3"
 )
 
+// myRole is a custom role that embeds the standard gorbac.Role
+// and adds additional fields
 type myRole struct {
-	*gorbac.StdRole
+	gorbac.Role[string]  // Embed the standard role
 	Label       string
 	Description string
+}
+
+// NewMyRole creates a new custom role with additional properties
+func NewMyRole(name string) *myRole {
+	// loading extra properties by `name`.
+	label, desc := loadByName(name)
+	return &myRole{
+		Role:        gorbac.NewRole(name),  // Create the standard role
+		Label:       label,
+		Description: desc,
+	}
 }
 
 func loadByName(name string) (label, description string) {
@@ -18,36 +31,27 @@ func loadByName(name string) (label, description string) {
 	return name + " for testing", "This is the description for " + name
 }
 
-func newMyRole(name string) gorbac.Role {
-	// loading extra properties by `name`.
-	label, desc := loadByName(name)
-	role := &myRole{
-		Label:       label,
-		Description: desc,
-	}
-	role.StdRole = gorbac.NewStdRole(name)
-	return role
-}
-
 func main() {
-	rbac := gorbac.New()
-	r1 := newMyRole("role-1")
-	r2 := newMyRole("role-2")
-	r3 := newMyRole("role-3")
-	r4 := newMyRole("role-4")
-	if err := rbac.Add(r1); err != nil {
+	rbac := gorbac.New[string]()
+	r1 := NewMyRole("role-1")
+	r2 := NewMyRole("role-2")
+	r3 := NewMyRole("role-3")
+	r4 := NewMyRole("role-4")
+	
+	// Add roles to RBAC - we need to pass the embedded Role part
+	if err := rbac.Add(r1.Role); err != nil {
 		fmt.Printf("Error: %s", err)
 		return
 	}
-	if err := rbac.Add(r2); err != nil {
+	if err := rbac.Add(r2.Role); err != nil {
 		fmt.Printf("Error: %s", err)
 		return
 	}
-	if err := rbac.Add(r3); err != nil {
+	if err := rbac.Add(r3.Role); err != nil {
 		fmt.Printf("Error: %s", err)
 		return
 	}
-	if err := rbac.Add(r4); err != nil {
+	if err := rbac.Add(r4.Role); err != nil {
 		fmt.Printf("Error: %s", err)
 		return
 	}
@@ -67,8 +71,9 @@ func main() {
 		fmt.Printf("Error: %s", err)
 		return
 	}
-	if myRole, ok := role.(*myRole); ok {
-		fmt.Printf("Name:\t%s\nLabel:\t%s\nDesc:\t%s\nParents:\t%s\n",
-			myRole.ID(), myRole.Label, myRole.Description, parents)
-	}
+	
+	// Note: In this simple example, we're not demonstrating access to the custom fields
+	// In a real application, you would maintain a separate map of custom roles
+	fmt.Printf("Role ID: %s\nParents: %v\n", role.ID, parents)
 }
+

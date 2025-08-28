@@ -16,7 +16,7 @@ import (
 	The role-e is inheriting from role-d.
 	Every roles have their own permissions.
 */
-func ExampleRbacStringID() {
+func ExampleRBAC_string() {
 	rbac := gorbac.New[string]()
 	rA := gorbac.NewRole("role-a")
 	rB := gorbac.NewRole("role-b")
@@ -68,7 +68,7 @@ func ExampleRbacStringID() {
 	// A circle inheratance occurred.
 }
 
-func ExampleRbacNumberID() {
+func ExampleRBAC_int() {
 	rbac := gorbac.New[int]()
 	rA := gorbac.NewRole(1)
 	rB := gorbac.NewRole(2)

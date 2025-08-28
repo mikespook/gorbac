@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mikespook/gorbac"
+	"github.com/mikespook/gorbac/v3"
 )
 
 func init() {
@@ -43,16 +43,16 @@ func main() {
 	if err := LoadJson("inher.json", &jsonInher); err != nil {
 		log.Fatal(err)
 	}
-	rbac := gorbac.New()
-	permissions := make(gorbac.Permissions)
+	rbac := gorbac.New[string]()
+	permissions := make(map[string]gorbac.Permission[string])
 
 	// Build roles and add them to goRBAC instance
 	for rid, pids := range jsonRoles {
-		role := gorbac.NewStdRole(rid)
+		role := gorbac.NewRole(rid)
 		for _, pid := range pids {
 			_, ok := permissions[pid]
 			if !ok {
-				permissions[pid] = gorbac.NewStdPermission(pid)
+				permissions[pid] = gorbac.NewPermission(pid)
 			}
 			role.Assign(permissions[pid])
 		}
@@ -82,8 +82,8 @@ func main() {
 		log.Println("Nobody can't read text")
 	}
 	// Add `nobody` and assign `read-text` permission
-	nobody := gorbac.NewStdRole("nobody")
-	permissions["read-text"] = gorbac.NewStdPermission("read-text")
+	nobody := gorbac.NewRole("nobody")
+	permissions["read-text"] = gorbac.NewPermission("read-text")
 	nobody.Assign(permissions["read-text"])
 	rbac.Add(nobody)
 	// Check if `nobody` can read text again
@@ -96,15 +96,15 @@ func main() {
 	jsonOutputRoles := make(map[string][]string)
 	// map[RoleId]ParentIds
 	jsonOutputInher := make(map[string][]string)
-	SaveJsonHandler := func(r gorbac.Role, parents []string) error {
+	SaveJsonHandler := func(r gorbac.Role[string], parents []string) error {
 		// WARNING: Don't use gorbac.RBAC instance in the handler,
 		// otherwise it causes deadlock.
 		permissions := make([]string, 0)
-		for _, p := range r.(*gorbac.StdRole).Permissions() {
+		for _, p := range r.Permissions() {
 			permissions = append(permissions, p.ID())
 		}
-		jsonOutputRoles[r.ID()] = permissions
-		jsonOutputInher[r.ID()] = parents
+		jsonOutputRoles[r.ID] = permissions
+		jsonOutputInher[r.ID] = parents
 		return nil
 	}
 	if err := gorbac.Walk(rbac, SaveJsonHandler); err != nil {
