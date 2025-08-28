@@ -18,29 +18,22 @@ Thus, RBAC has the following model:
 
 	* many to many relationship between identities and roles.
 	* many to many relationship between roles and permissions.
-	* roles can have a parent role (inheriting permissions).
+	* roles can have parent roles (inheriting permissions).
 
 Version
 =======
 
-Currently, goRBAC has two released versions
-
-[Version 1](https://github.com/mikespook/gorbac/tree/v1.dev) is the original design which will only be mantained to fix bugs.
-
-[Version 2](https://github.com/mikespook/gorbac/tree/v2.dev) is the new design which will only be mantained to fix bugs.
-
-and the developing branch is
-
-[The master branch](https://github.com/mikespook/gorbac) will be under development with generic (go 1.18 and higher) and can be changed without notice.
-
+The current version of goRBAC uses Go generics (Go 1.18+) and is under active development.
 
 Install
 =======
 
 Install the package:
 
-> $ go get github.com/mikespook/gorbac
-	
+```bash
+$ go get github.com/mikespook/gorbac/v3
+```
+
 Usage
 =====
 
@@ -55,78 +48,163 @@ Preparing
 
 Import the library:
 
-	import "github.com/mikespook/gorbac"
+```go
+import "github.com/mikespook/gorbac/v3"
+```
 
-Get a new instance of RBAC:
+Get a new instance of RBAC (using string as the ID type):
 
-	rbac := gorbac.New()
+```go
+rbac := gorbac.New[string]()
+```
 
 Get some new roles:
 
-	rA := gorbac.NewRole("role-a")
-	rB := gorbac.NewRole("role-b")
-	rC := gorbac.NewRole("role-c")
-	rD := gorbac.NewRole("role-d")
-	rE := gorbac.NewRole("role-e")
+```go
+rA := gorbac.NewRole("role-a")
+rB := gorbac.NewRole("role-b")
+rC := gorbac.NewRole("role-c")
+rD := gorbac.NewRole("role-d")
+rE := gorbac.NewRole("role-e")
+```
 
 Get some new permissions:
 
-	pA := gorbac.NewPermission("permission-a")
-	pB := gorbac.NewPermission("permission-b")
-	pC := gorbac.NewPermission("permission-c")
-	pD := gorbac.NewPermission("permission-d")
-	pE := gorbac.NewPermission("permission-e")
+```go
+pA := gorbac.NewPermission("permission-a")
+pB := gorbac.NewPermission("permission-b")
+pC := gorbac.NewPermission("permission-c")
+pD := gorbac.NewPermission("permission-d")
+pE := gorbac.NewPermission("permission-e")
+```
 
 Add the permissions to roles:
 
-	rA.Assign(pA)
-	rB.Assign(pB)
-	rC.Assign(pC)
-	rD.Assign(pD)
-	rE.Assign(pE)
+```go
+rA.Assign(pA)
+rB.Assign(pB)
+rC.Assign(pC)
+rD.Assign(pD)
+rE.Assign(pE)
+```
 
-Also, you can implement `gorbac.Role` and `gorbac.Permission` for your own data structure.
+Also, you can implement `gorbac.Permission` for your own data structure.
 
 After initialization, add the roles to the RBAC instance:
 
-	rbac.Add(rA)
-	rbac.Add(rB)
-	rbac.Add(rC)
-	rbac.Add(rD)
-	rbac.Add(rE)
+```go
+rbac.Add(rA)
+rbac.Add(rB)
+rbac.Add(rC)
+rbac.Add(rD)
+rbac.Add(rE)
+```
 
 And set the inheritance:
 
-	rbac.SetParent("role-a", "role-b")
-	rbac.SetParents("role-b", []string{"role-c", "role-d"})
-	rbac.SetParent("role-e", "role-d")
+```go
+rbac.SetParent("role-a", "role-b")
+rbac.SetParents("role-b", []string{"role-c", "role-d"})
+rbac.SetParent("role-e", "role-d")
+```
 
 Checking
 --------
 
 Checking the permission is easy:
 
-	if rbac.IsGranted("role-a", pA, nil) &&
-		rbac.IsGranted("role-a", pB, nil) &&
-		rbac.IsGranted("role-a", pC, nil) &&
-		rbac.IsGranted("role-a", pD, nil) {
-		fmt.Println("The role-a has been granted permis-a, b, c and d.")
-	}
+```go
+if rbac.IsGranted("role-a", pA, nil) &&
+	rbac.IsGranted("role-a", pB, nil) &&
+	rbac.IsGranted("role-a", pC, nil) &&
+	rbac.IsGranted("role-a", pD, nil) {
+	fmt.Println("The role-a has been granted permis-a, b, c and d.")
+}
+```
 
+Advanced Checking with Assertion Functions
+------------------------------------------
 
-And there are some built-in util-functions: 
-[InherCircle](https://godoc.org/github.com/mikespook/gorbac#InherCircle),
-[AnyGranted](https://godoc.org/github.com/mikespook/gorbac#AnyGranted), 
-[AllGranted](https://godoc.org/github.com/mikespook/gorbac#AllGranted). 
-Please [open an issue](https://github.com/mikespook/gorbac/issues/new) 
-for the new built-in requirement.
+You can also use assertion functions for more fine-grained permission controls:
 
-E.g.:
+```go
+assertion := func(rbac *gorbac.RBAC[string], id string, p gorbac.Permission[string]) bool {
+	// Custom logic to determine if permission should be granted
+	return true // or false based on your logic
+}
 
-	rbac.SetParent("role-c", "role-a")
-	if err := gorbac.InherCircle(rbac); err != nil {
-		fmt.Println("A circle inheratance occurred.")
-	}
+if rbac.IsGranted("role-a", pA, assertion) {
+	fmt.Println("The role-a has been granted permission-a based on the assertion.")
+}
+```
+
+Utility Functions
+-----------------
+
+goRBAC provides several built-in utility functions:
+
+### InherCircle
+Detects circular inheritance in the role hierarchy:
+
+```go
+rbac.SetParent("role-c", "role-a")
+if err := gorbac.InherCircle(rbac); err != nil {
+	fmt.Println("A circle inheritance occurred.")
+}
+```
+
+### AnyGranted
+Checks if any of the specified roles have a permission:
+
+```go
+roles := []string{"role-a", "role-b", "role-c"}
+if gorbac.AnyGranted(rbac, roles, pA, nil) {
+	fmt.Println("At least one role has permission-a.")
+}
+```
+
+### AllGranted
+Checks if all of the specified roles have a permission:
+
+```go
+roles := []string{"role-a", "role-b", "role-c"}
+if gorbac.AllGranted(rbac, roles, pA, nil) {
+	fmt.Println("All roles have permission-a.")
+}
+```
+
+### Walk
+Iterates through all roles in the RBAC instance:
+
+```go
+handler := func(r gorbac.Role[string], parents []string) error {
+	fmt.Printf("Role: %s, Parents: %v\n", r.ID, parents)
+	return nil
+}
+gorbac.Walk(rbac, handler)
+```
+
+Custom Types
+------------
+
+goRBAC supports custom types for role and permission IDs through Go generics:
+
+```go
+// Using integer IDs
+rbacInt := gorbac.New[int]()
+role1 := gorbac.NewRole(1)
+permission1 := gorbac.NewPermission(100)
+
+// Using custom struct IDs
+type RoleID struct {
+	Name string
+	Type string
+}
+
+rbacStruct := gorbac.New[RoleID]()
+roleCustom := gorbac.NewRole(RoleID{Name: "admin", Type: "system"})
+permissionCustom := gorbac.NewPermission(RoleID{Name: "read", Type: "data"})
+```
 
 Persistence
 -----------

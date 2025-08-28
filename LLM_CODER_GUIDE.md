@@ -64,26 +64,17 @@ The main RBAC structure manages roles and their inheritance relationships.
 
 All operations on the RBAC structure are thread-safe using read-write mutexes.
 
-### 2. Role Interface and Implementation (`role.go`)
+### 2. Role Implementation (`role.go`)
 
-The `Role[T]` interface defines the contract for roles:
+The `Role[T]` struct is the default implementation:
 
 ```go
-type Role[T comparable] interface {
-    ID() T
-    Assign(p Permission[T]) error
-    Permit(p Permission[T]) bool
-    Revoke(p Permission[T]) error
-    Permissions() []Permission[T]
+type Role[T comparable] struct {
+    sync.RWMutex
+    ID          T `json:"id"`
+    permissions Permissions[T]
 }
 ```
-
-#### Standard Role Implementation
-
-The package provides `StdRole[T]` as the default implementation:
-
-- `ID` - Unique identifier for the role
-- `permissions` - Map of permissions assigned to the role
 
 #### Key Methods
 
@@ -176,6 +167,13 @@ rbacStr := gorbac.New[string]()
 
 // Integer IDs
 rbacInt := gorbac.New[int]()
+
+// Custom struct IDs
+type RoleID struct {
+    Name string
+    Type string
+}
+rbacStruct := gorbac.New[RoleID]()
 ```
 
 ### Custom Assertion Functions
@@ -215,11 +213,11 @@ See `examples/persistence/persistence.go` for a complete example of:
 
 ### Custom Role Implementation
 
-See `examples/user-defined/user-defined.go` for an example of extending the standard role with custom properties:
+You can create custom roles by embedding the standard role:
 
 ```go
 type myRole struct {
-    *gorbac.StdRole
+    gorbac.Role[string]  // Embed the standard role
     Label       string
     Description string
 }
@@ -306,7 +304,7 @@ if gorbac.AllGranted(rbac, roles, permission, nil) {
 
 ## Extending the Package
 
-1. Implement custom `Role[T]` interfaces for domain-specific role behavior
+1. Embed standard `Role[T]` struct for domain-specific role behavior
 2. Implement custom `Permission[T]` interfaces for complex permission matching logic
 3. Use the `Walk` function to export RBAC state for persistence
 4. Add middleware functions for logging or metrics around RBAC operations
