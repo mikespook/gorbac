@@ -1,5 +1,10 @@
 package gorbac
 
+import (
+	"fmt"
+	"regexp"
+)
+
 // Permission interface
 // T is the type of permission ID
 type Permission[T comparable] interface {
@@ -26,5 +31,7 @@ func (p StdPermission[T]) ID() T {
 
 // Match another permission
 func (p StdPermission[T]) Match(a Permission[T]) bool {
-	return p.SID == a.ID()
+	match, _ := regexp.Match(fmt.Sprintf("%v", p.SID), []byte(fmt.Sprintf("%v", a.ID())))
+
+	return match
 }
